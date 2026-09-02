@@ -1,3 +1,5 @@
+import 'package:farmayopin/pages/registrar.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 class FormLogIn extends StatefulWidget {
@@ -180,6 +182,17 @@ class _FormLogInState extends State<FormLogIn> {
                         fontWeight: FontWeight.w400,
                         decoration: TextDecoration.underline,
                       ),
+                      // 1. Agrega el recognizer para detectar el toque
+                      recognizer: TapGestureRecognizer()
+                        ..onTap = () {
+                          // 2. Aquí colocas la navegación a tu nueva página
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const Registrar(),
+                            ), // Reemplaza RegistroPage por tu vista
+                          );
+                        },
                     ),
                   ],
                 ),
