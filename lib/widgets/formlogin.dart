@@ -1,4 +1,5 @@
 import 'package:farmayopin/pages/registrar.dart';
+import 'package:farmayopin/widgets/glass_card.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
@@ -35,13 +36,7 @@ class _FormLogInState extends State<FormLogIn> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: MediaQuery.of(context).size.width * 0.85,
-      padding: const EdgeInsets.all(24),
-      decoration: ShapeDecoration(
-        color: Colors.white.withValues(alpha: 0.80),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-      ),
+    return GlassCard(
       child: Form(
         key: _formKey,
         child: Column(
@@ -180,7 +175,6 @@ class _FormLogInState extends State<FormLogIn> {
                         fontSize: 16,
                         fontFamily: 'Inter',
                         fontWeight: FontWeight.w400,
-                        decoration: TextDecoration.underline,
                       ),
                       // 1. Agrega el recognizer para detectar el toque
                       recognizer: TapGestureRecognizer()

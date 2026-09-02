@@ -1,38 +1,31 @@
+// lib/widgets/farmayopin_header.dart
+import 'package:farmayopin/widgets/glass_card.dart';
 import 'package:flutter/material.dart';
 
-class FarmayopinHeader extends StatelessWidget implements PreferredSizeWidget {
+class FarmayopinHeader extends StatelessWidget {
   const FarmayopinHeader({super.key});
 
   @override
-  Size get preferredSize => const Size.fromHeight(121);
-
-  @override
   Widget build(BuildContext context) {
-    return Container(
-      width: MediaQuery.of(context).size.width * 0.85,
-      height: 121,
-      decoration: ShapeDecoration(
-        color: Colors.white.withValues(alpha: 0.80),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-      ),
+    return const GlassCard(
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
         children: [
           Text(
             'farmayopin',
+            textAlign: TextAlign.center,
             style: TextStyle(
-              color: const Color(0xFFDC0000),
+              color: Color(0xFFDC0000),
               fontSize: 48,
               fontFamily: 'Inter',
               fontWeight: FontWeight.w700,
             ),
           ),
-
           Text(
             'tu salud primero, siempre',
+            textAlign: TextAlign.center,
             style: TextStyle(
-              color: const Color(0xFF1E1E1E),
+              color: Color(0xFF1E1E1E),
               fontSize: 20,
               fontFamily: 'Inter',
               fontWeight: FontWeight.w400,

@@ -1,6 +1,6 @@
-import 'package:farmayopin/widgets/background_container.dart';
 import 'package:farmayopin/widgets/farmayopin_header.dart';
 import 'package:farmayopin/widgets/formregister.dart';
+import 'package:farmayopin/widgets/main_layout.dart';
 import 'package:flutter/material.dart';
 
 class Registrar extends StatelessWidget {
@@ -8,16 +8,14 @@ class Registrar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: BackgroundContainer(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: const [
-            FarmayopinHeader(),
-            SizedBox(height: 20),
-            FormRegister(),
-          ],
-        ),
+    return MainLayout(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: const [
+          FarmayopinHeader(),
+          SizedBox(height: 20),
+          FormRegister(),
+        ],
       ),
     );
   }

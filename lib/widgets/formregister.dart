@@ -1,3 +1,4 @@
+import 'package:farmayopin/widgets/glass_card.dart';
 import 'package:flutter/material.dart';
 
 class FormRegister extends StatefulWidget {
@@ -53,13 +54,7 @@ class _FormRegisterState extends State<FormRegister> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: MediaQuery.of(context).size.width * 0.85,
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.80),
-        borderRadius: BorderRadius.circular(15),
-      ),
+    return GlassCard(
       child: Form(
         key: _formKey,
         child: Column(

@@ -1,6 +1,6 @@
-import 'package:farmayopin/widgets/background_container.dart';
 import 'package:farmayopin/widgets/farmayopin_header.dart';
 import 'package:farmayopin/widgets/formlogin.dart';
+import 'package:farmayopin/widgets/main_layout.dart';
 import 'package:flutter/material.dart';
 
 class HomePage extends StatelessWidget {
@@ -8,16 +8,10 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: BackgroundContainer(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: const [
-            FarmayopinHeader(),
-            SizedBox(height: 20),
-            FormLogIn(),
-          ],
-        ),
+    return const MainLayout(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [FarmayopinHeader(), SizedBox(height: 20), FormLogIn()],
       ),
     );
   }
