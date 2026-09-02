@@ -1,0 +1,193 @@
+import 'package:flutter/material.dart';
+
+class FormLogIn extends StatefulWidget {
+  const FormLogIn({super.key});
+
+  @override
+  State<FormLogIn> createState() => _FormLogInState();
+}
+
+class _FormLogInState extends State<FormLogIn> {
+  final _formKey = GlobalKey<FormState>();
+
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  void _ingresar() {
+    if (_formKey.currentState!.validate()) {
+      final email = _emailController.text;
+      final password = _passwordController.text;
+
+      // Acá posteriormente llamaremos a tu API.
+      print('Email: $email');
+      print('Contraseña: $password');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: MediaQuery.of(context).size.width * 0.85,
+      padding: const EdgeInsets.all(24),
+      decoration: ShapeDecoration(
+        color: Colors.white.withValues(alpha: 0.80),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+      ),
+      child: Form(
+        key: _formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // EMAIL
+            const Text(
+              'Email',
+              style: TextStyle(
+                color: Color(0xFF1E1E1E),
+                fontSize: 16,
+                fontFamily: 'Inter',
+                fontWeight: FontWeight.w400,
+              ),
+            ),
+
+            const SizedBox(height: 8),
+
+            TextFormField(
+              controller: _emailController,
+              keyboardType: TextInputType.emailAddress,
+              decoration: InputDecoration(
+                hintText: 'johndoe@gmail.com',
+                filled: true,
+                fillColor: Colors.white,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: const BorderSide(color: Color(0xFFD9D9D9)),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: const BorderSide(color: Color(0xFFD9D9D9)),
+                ),
+              ),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Ingresá tu email';
+                }
+
+                if (!value.contains('@')) {
+                  return 'Ingresá un email válido';
+                }
+
+                return null;
+              },
+            ),
+
+            const SizedBox(height: 24),
+
+            // CONTRASEÑA
+            const Text(
+              'Contraseña',
+              style: TextStyle(
+                color: Color(0xFF1E1E1E),
+                fontSize: 16,
+                fontFamily: 'Inter',
+                fontWeight: FontWeight.w400,
+              ),
+            ),
+
+            const SizedBox(height: 8),
+
+            TextFormField(
+              controller: _passwordController,
+              obscureText: true,
+              decoration: InputDecoration(
+                hintText: 'Contraseña',
+                filled: true,
+                fillColor: Colors.white,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: const BorderSide(color: Color(0xFFD9D9D9)),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: const BorderSide(color: Color(0xFFD9D9D9)),
+                ),
+              ),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Ingresá tu contraseña';
+                }
+
+                return null;
+              },
+            ),
+
+            const SizedBox(height: 24),
+
+            // BOTÓN INGRESAR
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: _ingresar,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF2C2C2C),
+                  foregroundColor: const Color(0xFFF5F5F5),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                child: const Text(
+                  'Ingresar',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontFamily: 'Inter',
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 24),
+
+            // REGISTRO
+            SizedBox(
+              width: double.infinity,
+              child: Text.rich(
+                TextSpan(
+                  children: [
+                    const TextSpan(
+                      text: '¿Aún no tienes cuenta?',
+                      style: TextStyle(
+                        color: Color(0xFF1E1E1E),
+                        fontSize: 16,
+                        fontFamily: 'Inter',
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                    const TextSpan(text: ' '),
+                    TextSpan(
+                      text: 'Registrate',
+                      style: const TextStyle(
+                        color: Color(0xFFDC0000),
+                        fontSize: 16,
+                        fontFamily: 'Inter',
+                        fontWeight: FontWeight.w400,
+                        decoration: TextDecoration.underline,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

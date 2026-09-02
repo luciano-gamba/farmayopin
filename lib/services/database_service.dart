@@ -1,0 +1,1 @@
+// Servicio que maneja la base de datos local con Drift (SQLite) para el historial de compras offline
