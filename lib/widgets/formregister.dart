@@ -1,4 +1,6 @@
+import 'package:farmayopin/pages/noRol/home.dart';
 import 'package:farmayopin/widgets/glass_card.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 class FormRegister extends StatefulWidget {
@@ -213,6 +215,44 @@ class _FormRegisterState extends State<FormRegister> {
                     fontFamily: 'Inter',
                     fontWeight: FontWeight.w600,
                   ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              child: Text.rich(
+                TextSpan(
+                  children: [
+                    const TextSpan(
+                      text: '¿Ya tienes cuenta?',
+                      style: TextStyle(
+                        color: Color(0xFF1E1E1E),
+                        fontSize: 16,
+                        fontFamily: 'Inter',
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                    const TextSpan(text: ' '),
+                    TextSpan(
+                      text: 'Ingresa',
+                      style: const TextStyle(
+                        color: Color(0xFFDC0000),
+                        fontSize: 16,
+                        fontFamily: 'Inter',
+                        fontWeight: FontWeight.w400,
+                      ),
+                      recognizer: TapGestureRecognizer()
+                        ..onTap = () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const HomePage(),
+                            ),
+                          );
+                        },
+                    ),
+                  ],
                 ),
               ),
             ),

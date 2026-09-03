@@ -129,22 +129,23 @@ class _FormLogInState extends State<FormLogIn> {
             // BOTÓN INGRESAR
             SizedBox(
               width: double.infinity,
+              height: 48,
               child: ElevatedButton(
                 onPressed: _ingresar,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF2C2C2C),
-                  foregroundColor: const Color(0xFFF5F5F5),
-                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  backgroundColor: const Color(0xFF1E1E1E),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
+                  elevation: 0,
                 ),
                 child: const Text(
                   'Ingresar',
                   style: TextStyle(
+                    color: Colors.white,
                     fontSize: 16,
                     fontFamily: 'Inter',
-                    fontWeight: FontWeight.w400,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
