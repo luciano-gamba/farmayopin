@@ -1,4 +1,5 @@
 import 'package:farmayopin/pages/noRol/registrar.dart';
+import 'package:farmayopin/services/pocketbase_service.dart';
 import 'package:farmayopin/widgets/glass_card.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -11,6 +12,8 @@ class FormLogIn extends StatefulWidget {
 }
 
 class _FormLogInState extends State<FormLogIn> {
+  final PocketBaseService pocketBaseService = PocketBaseService();
+
   final _formKey = GlobalKey<FormState>();
 
   final _emailController = TextEditingController();
@@ -23,14 +26,33 @@ class _FormLogInState extends State<FormLogIn> {
     super.dispose();
   }
 
-  void _ingresar() {
+  Future<void> _ingresar() async {
     if (_formKey.currentState!.validate()) {
       final email = _emailController.text;
       final password = _passwordController.text;
 
-      // Acá posteriormente llamaremos a tu API.
-      print('Email: $email');
-      print('Contraseña: $password');
+      try {
+        final usuario = await pocketBaseService.iniciarSesion(
+          email: _emailController.text, 
+          password: _passwordController.text,
+          );
+          print('Bienvenido ${usuario.get<String>('name')}');
+          
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Bienvenido ${usuario.get<String>('name')}'),
+              backgroundColor: Colors.green,
+            )
+          );
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Error al iniciar sesión'),
+            backgroundColor: Colors.red,
+          )
+        );
+        print ('Error al iniciar sesión: $e');
+      } 
     }
   }
 

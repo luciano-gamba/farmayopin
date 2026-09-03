@@ -1,4 +1,5 @@
 import 'package:farmayopin/pages/noRol/home.dart';
+import 'package:farmayopin/services/pocketbase_service.dart';
 import 'package:farmayopin/widgets/glass_card.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -11,6 +12,9 @@ class FormRegister extends StatefulWidget {
 }
 
 class _FormRegisterState extends State<FormRegister> {
+
+  final PocketBaseService pocketBaseService = PocketBaseService();
+
   // Clave para gestionar el estado del formulario y activar las validaciones
   final _formKey = GlobalKey<FormState>();
 
@@ -38,6 +42,12 @@ class _FormRegisterState extends State<FormRegister> {
   void _submitForm() {
     // Dispara la validación de todos los TextFormField dentro del Form
     if (_formKey.currentState!.validate()) {
+      registrar();
+    }
+  }
+
+  Future<void> registrar() async {
+    try {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Procesando registro...'),
@@ -45,12 +55,26 @@ class _FormRegisterState extends State<FormRegister> {
         ),
       );
 
-      // Aquí puedes enviar los datos a tu API o backend
-      print('Email: ${_emailController.text}');
-      print('Nombre: ${_nameController.text}');
-      print(
-        'Fecha: ${_dayController.text}/${_monthController.text}/${_yearController.text}',
+      await pocketBaseService.registrarUsuario(
+        email: _emailController.text,
+        nombre: _nameController.text, 
+        password: _passwordController.text,
+        );
+
+        ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Usuario registrado correctamente'),
+          backgroundColor: Colors.green,
+        ),
       );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Error al registrar el usuario'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      print('Error al registrar: $e');
     }
   }
 
