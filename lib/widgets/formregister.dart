@@ -163,8 +163,9 @@ class _FormRegisterState extends State<FormRegister> {
                     validator: (value) {
                       if (value == null || value.isEmpty) return 'Mes';
                       final month = int.tryParse(value);
-                      if (month == null || month < 1 || month > 12)
+                      if (month == null || month < 1 || month > 12) {
                         return 'Inválido';
+                      }
                       return null;
                     },
                   ),
@@ -181,8 +182,9 @@ class _FormRegisterState extends State<FormRegister> {
                     validator: (value) {
                       if (value == null || value.isEmpty) return 'Año';
                       final year = int.tryParse(value);
-                      if (year == null || year < 1900 || year > 2026)
+                      if (year == null || year < 1900 || year > 2026) {
                         return 'Inválido';
+                      }
                       return null;
                     },
                   ),

@@ -1,4 +1,4 @@
-import 'package:farmayopin/pages/registrar.dart';
+import 'package:farmayopin/pages/noRol/registrar.dart';
 import 'package:farmayopin/widgets/glass_card.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
