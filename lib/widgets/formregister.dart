@@ -1,3 +1,4 @@
+import 'package:farmayopin/pages/cliente/productos_screen.dart';
 import 'package:farmayopin/pages/noRol/home.dart';
 import 'package:farmayopin/services/pocketbase_service.dart';
 import 'package:farmayopin/widgets/glass_card.dart';
@@ -66,7 +67,12 @@ class _FormRegisterState extends State<FormRegister> {
           content: Text('Usuario registrado correctamente'),
           backgroundColor: Colors.green,
         ),
-      );
+        );
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const ListaProductos()),
+        );
+        
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(

@@ -1,6 +1,7 @@
 // Aca ira la conexion con pocketbase
 import 'dart:io';
 
+import 'package:farmayopin/models/producto.dart';
 import 'package:pocketbase/pocketbase.dart';
 import 'package:http/http.dart' as http;
 
@@ -53,8 +54,25 @@ class PocketBaseService {
   // PRODUCTOS
   // =========================
 
-  Future<List<RecordModel>> obtenerProductos() async {
-    return await pb.collection('productos').getFullList();
+  Future<List<Producto>> obtenerProductos() async {
+    final registros = await pb.collection('productos').getFullList();
+
+    return registros.map((registro) {
+      final nombreImagen = registro.get<String>('imagenProducto');
+      
+      final urlImagen = nombreImagen.isNotEmpty
+          ? pb.files.getUrl(registro, nombreImagen).toString()
+          : '';
+
+      return Producto(
+        id: registro.id,
+        nombre: registro.get<String>('nombre'),
+        precio: registro.get<double>('precio'), 
+        stock: registro.get<int>('stock'), 
+        descripcion: registro.get<String?>('descripcion'), 
+        imagen: urlImagen,
+      );
+    }).toList(); 
   }
 
   Future<RecordModel> nuevoProducto({
