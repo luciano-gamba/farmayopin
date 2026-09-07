@@ -13,7 +13,6 @@ class FormRegister extends StatefulWidget {
 }
 
 class _FormRegisterState extends State<FormRegister> {
-
   final PocketBaseService pocketBaseService = PocketBaseService();
 
   // Clave para gestionar el estado del formulario y activar las validaciones
@@ -58,21 +57,20 @@ class _FormRegisterState extends State<FormRegister> {
 
       await pocketBaseService.registrarUsuario(
         email: _emailController.text,
-        nombre: _nameController.text, 
+        nombre: _nameController.text,
         password: _passwordController.text,
-        );
+      );
 
-        ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Usuario registrado correctamente'),
           backgroundColor: Colors.green,
         ),
-        );
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const ListaProductos()),
-        );
-        
+      );
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const ListaProductos()),
+      );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -122,8 +120,8 @@ class _FormRegisterState extends State<FormRegister> {
                 if (value == null || value.isEmpty) {
                   return 'La contraseña es requerida';
                 }
-                if (value.length < 6) {
-                  return 'Mínimo 6 caracteres';
+                if (value.length < 8) {
+                  return 'Mínimo 8 caracteres';
                 }
                 return null;
               },
