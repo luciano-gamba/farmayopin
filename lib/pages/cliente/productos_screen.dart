@@ -55,7 +55,9 @@ class _ListaProductosState extends State<ListaProductos> {
                   ? const Center(
                       child: CircularProgressIndicator(),
                     )
-                  : GridView.builder(
+                  : RefreshIndicator(
+                    onRefresh: cargarProductos,
+                    child : GridView.builder(
                       padding: const EdgeInsets.all(16),
                       gridDelegate:
                           const SliverGridDelegateWithFixedCrossAxisCount(
@@ -71,6 +73,7 @@ class _ListaProductosState extends State<ListaProductos> {
                         );
                       },
                     ),
+                  ),   
             ),
           ],
         ),
