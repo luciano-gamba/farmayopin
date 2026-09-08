@@ -3,8 +3,8 @@ import 'package:farmayopin/widgets/formlogin.dart';
 import 'package:farmayopin/widgets/main_layout.dart';
 import 'package:flutter/material.dart';
 
-class HomePage extends StatelessWidget {
-  const HomePage({super.key});
+class Ingresar extends StatelessWidget {
+  const Ingresar({super.key});
 
   @override
   Widget build(BuildContext context) {

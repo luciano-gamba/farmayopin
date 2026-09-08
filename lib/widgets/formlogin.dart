@@ -1,4 +1,4 @@
-import 'package:farmayopin/pages/cliente/productos_screen.dart';
+import 'package:farmayopin/pages/cliente/listar_productos.dart';
 import 'package:farmayopin/pages/noRol/registrar.dart';
 import 'package:farmayopin/services/pocketbase_service.dart';
 import 'package:farmayopin/widgets/glass_card.dart';
@@ -34,31 +34,30 @@ class _FormLogInState extends State<FormLogIn> {
 
       try {
         final usuario = await pocketBaseService.iniciarSesion(
-          email: _emailController.text, 
+          email: _emailController.text,
           password: _passwordController.text,
-          );
-          print('Bienvenido ${usuario.get<String>('name')}');
-          
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Bienvenido ${usuario.get<String>('name')}'),
-              backgroundColor: Colors.green,
-            )
-            
-          );
-          Navigator.pushReplacement(
+        );
+        print('Bienvenido ${usuario.get<String>('name')}');
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Bienvenido ${usuario.get<String>('name')}'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const ListaProductos()),
+          MaterialPageRoute(builder: (context) => const ListarProductos()),
         );
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Error al iniciar sesión'),
             backgroundColor: Colors.red,
-          )
+          ),
         );
-        print ('Error al iniciar sesión: $e');
-      } 
+        print('Error al iniciar sesión: $e');
+      }
     }
   }
 

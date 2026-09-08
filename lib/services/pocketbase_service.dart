@@ -6,8 +6,8 @@ import 'package:pocketbase/pocketbase.dart';
 import 'package:http/http.dart' as http;
 
 class PocketBaseService {
-  final pb = PocketBase('http://10.0.2.2:8090');
-  
+  final pb = PocketBase('http://127.0.0.1:8090');
+
   // =========================
   // AUTENTICACIÓN
   // =========================
@@ -26,9 +26,7 @@ class PocketBaseService {
       'passwordConfirm': password,
     };
 
-    final record = await pb.collection('users').create(
-      body: body,
-    );
+    final record = await pb.collection('users').create(body: body);
 
     return record;
   }
@@ -37,19 +35,21 @@ class PocketBaseService {
     required String email,
     required String password,
   }) async {
-    final authData = await pb.collection('users').authWithPassword(email, password);
+    final authData = await pb
+        .collection('users')
+        .authWithPassword(email, password);
 
     return authData.record;
   }
 
-  Future<void> cerrarSesion() async{
+  Future<void> cerrarSesion() async {
     pb.authStore.clear();
   }
 
   Future<void> solicitarRecuperacionPassword(String email) async {
     await pb.collection('users').requestPasswordReset(email);
   }
-  
+
   // =========================
   // PRODUCTOS
   // =========================
@@ -59,7 +59,7 @@ class PocketBaseService {
 
     return registros.map((registro) {
       final nombreImagen = registro.get<String>('imagenProducto');
-      
+
       final urlImagen = nombreImagen.isNotEmpty
           ? pb.files.getUrl(registro, nombreImagen).toString()
           : '';
@@ -67,12 +67,12 @@ class PocketBaseService {
       return Producto(
         id: registro.id,
         nombre: registro.get<String>('nombre'),
-        precio: registro.get<double>('precio'), 
-        stock: registro.get<int>('stock'), 
-        descripcion: registro.get<String?>('descripcion'), 
+        precio: registro.get<double>('precio'),
+        stock: registro.get<int>('stock'),
+        descripcion: registro.get<String?>('descripcion'),
         imagen: urlImagen,
       );
-    }).toList(); 
+    }).toList();
   }
 
   Future<RecordModel> nuevoProducto({
@@ -89,18 +89,18 @@ class PocketBaseService {
       'stock': stock,
     };
 
-    final record = await pb.collection('productos').create(
-      body: body,
-      files: [
-        await http.MultipartFile.fromPath(
-          'imagenProducto', 
-          imagenProducto.path,
-        ),
-      ],
-    );
+    final record = await pb
+        .collection('productos')
+        .create(
+          body: body,
+          files: [
+            await http.MultipartFile.fromPath(
+              'imagenProducto',
+              imagenProducto.path,
+            ),
+          ],
+        );
 
     return record;
   }
 }
-
-

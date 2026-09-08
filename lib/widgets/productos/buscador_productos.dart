@@ -1,9 +1,8 @@
-
-import 'package:farmayopin/pages/noRol/home.dart';
+import 'package:farmayopin/pages/noRol/ingresar.dart';
 import 'package:farmayopin/services/pocketbase_service.dart';
 import 'package:flutter/material.dart';
 
-class BuscadorProductos extends StatelessWidget{
+class BuscadorProductos extends StatelessWidget {
   const BuscadorProductos({super.key});
 
   Future<void> _cerrarSesion(BuildContext context) async {
@@ -14,10 +13,11 @@ class BuscadorProductos extends StatelessWidget{
           title: const Text('Cerrar sesión'),
           content: const Text('¿Estás seguro de que deseas cerrar sesión?'),
           actions: [
-            TextButton(onPressed: () {
-              Navigator.pop(context, false);
-            },
-            child: const Text('Cancelar'),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context, false);
+              },
+              child: const Text('Cancelar'),
             ),
             ElevatedButton(
               onPressed: () {
@@ -35,25 +35,26 @@ class BuscadorProductos extends StatelessWidget{
 
       await pbService.cerrarSesion();
 
-      if(context.mounted) {
+      if (context.mounted) {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const HomePage()),
+          MaterialPageRoute(builder: (context) => const Ingresar()),
         );
       }
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Expanded( 
+        Expanded(
           child: TextField(
             decoration: InputDecoration(
               hintText: 'Buscar producto...',
               prefixIcon: const Icon(Icons.search),
+              filled: true,
+              fillColor: Colors.white.withValues(alpha: 0.80),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(30),
               ),
@@ -62,7 +63,7 @@ class BuscadorProductos extends StatelessWidget{
         ),
 
         const SizedBox(width: 12),
-        
+
         GestureDetector(
           onTap: () => _cerrarSesion(context),
           child: ClipOval(
@@ -74,7 +75,7 @@ class BuscadorProductos extends StatelessWidget{
             ),
           ),
         ),
-      ]
+      ],
     );
   }
 }

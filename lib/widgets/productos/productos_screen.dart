@@ -1,18 +1,17 @@
 import 'package:farmayopin/models/producto.dart';
 import 'package:farmayopin/services/pocketbase_service.dart';
 import 'package:farmayopin/widgets/productos/buscador_productos.dart';
-import 'package:farmayopin/widgets/productos/categorias_productos.dart';
 import 'package:farmayopin/widgets/productos/producto_card.dart';
 import 'package:flutter/material.dart';
 
-class ListaProductos extends StatefulWidget {
-  const ListaProductos({super.key});
+class ProductosScreen extends StatefulWidget {
+  const ProductosScreen({super.key});
 
   @override
-  State<ListaProductos> createState() => _ListaProductosState();
+  State<ProductosScreen> createState() => _ListaProductosState();
 }
 
-class _ListaProductosState extends State<ListaProductos> {
+class _ListaProductosState extends State<ProductosScreen> {
   final PocketBaseService pocketBaseService = PocketBaseService();
 
   List<Producto> productos = [];
@@ -43,42 +42,34 @@ class _ListaProductosState extends State<ListaProductos> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: Column(
-          children: [
-            BuscadorProductos(),
-            
+    return SafeArea(
+      child: Column(
+        children: [
+          BuscadorProductos(),
 
-            Expanded(
-              child: cargando
-                  ? const Center(
-                      child: CircularProgressIndicator(),
-                    )
-                  : RefreshIndicator(
+          Expanded(
+            child: cargando
+                ? const Center(child: CircularProgressIndicator())
+                : RefreshIndicator(
                     onRefresh: cargarProductos,
-                    child : GridView.builder(
+                    child: GridView.builder(
                       padding: const EdgeInsets.all(16),
                       gridDelegate:
                           const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        crossAxisSpacing: 12,
-                        mainAxisSpacing: 12,
-                        childAspectRatio: 0.7,
-                      ),
+                            crossAxisCount: 2,
+                            crossAxisSpacing: 12,
+                            mainAxisSpacing: 12,
+                            childAspectRatio: 0.7,
+                          ),
                       itemCount: productos.length,
                       itemBuilder: (context, index) {
-                        return ProductoCard(
-                          producto: productos[index],
-                        );
+                        return ProductoCard(producto: productos[index]);
                       },
                     ),
-                  ),   
-            ),
-          ],
-        ),
+                  ),
+          ),
+        ],
       ),
     );
   }
 }
-

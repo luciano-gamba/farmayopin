@@ -1,5 +1,5 @@
-import 'package:farmayopin/pages/cliente/productos_screen.dart';
-import 'package:farmayopin/pages/noRol/home.dart';
+import 'package:farmayopin/pages/cliente/listar_productos.dart';
+import 'package:farmayopin/pages/noRol/ingresar.dart';
 import 'package:farmayopin/services/pocketbase_service.dart';
 import 'package:farmayopin/widgets/glass_card.dart';
 import 'package:flutter/gestures.dart';
@@ -69,7 +69,7 @@ class _FormRegisterState extends State<FormRegister> {
       );
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const ListaProductos()),
+        MaterialPageRoute(builder: (context) => const ListarProductos()),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -275,7 +275,7 @@ class _FormRegisterState extends State<FormRegister> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => const HomePage(),
+                              builder: (context) => const Ingresar(),
                             ),
                           );
                         },
