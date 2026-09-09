@@ -1,11 +1,19 @@
 // Aca ira la conexion con pocketbase
 import 'dart:io';
-
 import 'package:farmayopin/models/producto.dart';
 import 'package:pocketbase/pocketbase.dart';
 import 'package:http/http.dart' as http;
 
 class PocketBaseService {
+
+  static final PocketBaseService _instance = PocketBaseService._internal();
+
+  factory PocketBaseService() {
+    return _instance;
+  }
+
+  PocketBaseService._internal();
+
   final pb = PocketBase('http://127.0.0.1:8090');
 
   // =========================
@@ -102,5 +110,10 @@ class PocketBaseService {
         );
 
     return record;
+  }
+
+  Future<void> revisarServicio() async {
+    print('Sesión válida: ${pb.authStore.isValid}');
+    print('Usuario autenticado: ${pb.authStore.record}');
   }
 }

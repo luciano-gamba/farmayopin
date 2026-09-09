@@ -1,3 +1,4 @@
+import 'package:farmayopin/pages/admin/listar_productos_admin.dart';
 import 'package:farmayopin/pages/cliente/listar_productos.dart';
 import 'package:farmayopin/pages/noRol/registrar.dart';
 import 'package:farmayopin/services/pocketbase_service.dart';
@@ -45,10 +46,18 @@ class _FormLogInState extends State<FormLogIn> {
             backgroundColor: Colors.green,
           ),
         );
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const ListarProductos()),
-        );
+        if(usuario.get<String>('role') == 'cliente') {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const ListarProductos()),
+          );
+        } else if (usuario.get<String>('role') == 'admin') {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const ListarProductosAdmin()),
+          );
+        }
+        
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
