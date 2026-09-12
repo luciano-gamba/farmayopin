@@ -14,7 +14,7 @@ class PocketBaseService {
 
   PocketBaseService._internal();
 
-  final pb = PocketBase('http://127.0.0.1:8090');
+  final pb = PocketBase('http://10.0.2.2:8090');
 
   // =========================
   // AUTENTICACIÓN
@@ -34,7 +34,7 @@ class PocketBaseService {
       'passwordConfirm': password,
     };
 
-    final record = await pb.collection('users').create(body: body);
+    final record = await pb.collection('usuarios').create(body: body);
 
     return record;
   }
@@ -44,7 +44,7 @@ class PocketBaseService {
     required String password,
   }) async {
     final authData = await pb
-        .collection('users')
+        .collection('usuarios')
         .authWithPassword(email, password);
 
     return authData.record;
@@ -55,7 +55,7 @@ class PocketBaseService {
   }
 
   Future<void> solicitarRecuperacionPassword(String email) async {
-    await pb.collection('users').requestPasswordReset(email);
+    await pb.collection('usuarios').requestPasswordReset(email);
   }
 
   // =========================
