@@ -1,6 +1,6 @@
 import 'package:farmayopin/models/producto.dart';
 import 'package:farmayopin/services/pocketbase_service.dart';
-import 'package:farmayopin/widgets/productos/buscador_productos.dart';
+import 'package:farmayopin/widgets/productos/product_finder.dart';
 import 'package:farmayopin/widgets/productos/producto_card.dart';
 import 'package:flutter/material.dart';
 

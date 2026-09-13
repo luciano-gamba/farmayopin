@@ -1,6 +1,9 @@
 import 'dart:io';
-import 'package:farmayopin/pages/admin/listar_productos_admin.dart';
+import 'package:farmayopin/pages/cliente/listar_productos.dart';
 import 'package:farmayopin/services/pocketbase_service.dart';
+import 'package:farmayopin/widgets/formularios/form_input_decoration.dart';
+import 'package:farmayopin/widgets/formularios/image_picker_field.dart';
+import 'package:farmayopin/widgets/glass_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
@@ -93,7 +96,7 @@ class _FormNewProductState extends State<FormNewProduct> {
       if (!mounted) return;
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const ListarProductosAdmin()),
+        MaterialPageRoute(builder: (context) => const ListarProductos()),
       );
     } catch (e) {
       print('ERROR AL CREAR PRODUCTO: $e');
@@ -116,56 +119,36 @@ class _FormNewProductState extends State<FormNewProduct> {
       child: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 34),
-          child: Container(
+          child: GlassCard(
             padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(15),
-            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Imagen
-                GestureDetector(
-                  onTap: _seleccionarImagen,
-                  child: Container(
-                    width: double.infinity,
-                    height: 180,
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: _imagenSeleccionada == null
-                    ? const Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.add_photo_alternate_outlined,
-                          size: 50,
-                          color: Colors.grey,
-                        ),
-                        SizedBox(height: 8),
-                        Text(
-                          'Seleccionar imagen',
-                          style: TextStyle(color: Colors.grey),
-                        ),
-                      ],
-                    )
-                    : ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: Image.file(
-                        _imagenSeleccionada!,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                  ),
+                ImagePickerField(
+                  imagen: _imagenSeleccionada,
+                  onSeleccionar: _seleccionarImagen,
                 ),
 
                 const SizedBox(height: 16),
 
+                const Text(
+                  'Nombre',
+                  style: TextStyle(
+                    color: Color(0xFF1E1E1E),
+                    fontSize: 16,
+                    fontFamily: 'Inter',
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+
+                const SizedBox(height: 8),
+
                 TextFormField(
                   controller: _nombreController,
-                  decoration: const InputDecoration(labelText: 'Nombre'),
+                  decoration: FormInputDecoration.campo(
+                    hintText: 'Nombre del producto',
+                  ),
                   maxLength: 100,
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
@@ -177,21 +160,35 @@ class _FormNewProductState extends State<FormNewProduct> {
                     }
 
                     return null;
-                  }
+                  },
                 ),
 
                 const SizedBox(height: 12),
+
+                const Text(
+                  'Precio',
+                  style: TextStyle(
+                    color: Color(0xFF1E1E1E),
+                    fontSize: 16,
+                    fontFamily: 'Inter',
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+
+                const SizedBox(height: 8),
 
                 TextFormField(
                   controller: _precioController,
                   keyboardType: const TextInputType.numberWithOptions(
                     decimal: true,
                   ),
-                  decoration: const InputDecoration(labelText: 'Precio'),
+                  decoration: FormInputDecoration.campo(
+                    hintText: '0,00',
+                  ),
                   inputFormatters: [
                     FilteringTextInputFormatter.allow(
                       RegExp(r'^\d*[.,]?\d{0,2}'),
-                    )
+                    ),
                   ],
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
@@ -222,10 +219,24 @@ class _FormNewProductState extends State<FormNewProduct> {
 
                 const SizedBox(height: 12),
 
+                const Text(
+                  'Stock',
+                  style: TextStyle(
+                    color: Color(0xFF1E1E1E),
+                    fontSize: 16,
+                    fontFamily: 'Inter',
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+
+                const SizedBox(height: 8),
+
                 TextFormField(
                   controller: _stockController,
                   keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(labelText: 'Stock'),
+                  decoration: FormInputDecoration.campo(
+                    hintText: 'Cantidad disponible',
+                  ),
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
                       return 'El stock del producto es requerido';
@@ -251,13 +262,24 @@ class _FormNewProductState extends State<FormNewProduct> {
 
                 const SizedBox(height: 12),
 
+                const Text(
+                  'Detalle',
+                  style: TextStyle(
+                    color: Color(0xFF1E1E1E),
+                    fontSize: 16,
+                    fontFamily: 'Inter',
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+
+                const SizedBox(height: 8),
+
                 TextFormField(
                   controller: _detalleController,
                   maxLines: 4,
                   maxLength: 500,
-                  decoration: const InputDecoration(
-                    labelText: 'Detalle',
-                    alignLabelWithHint: true,
+                  decoration: FormInputDecoration.campo(
+                    hintText: 'Descripción del producto',
                   ),
                 ),
 
@@ -272,7 +294,7 @@ class _FormNewProductState extends State<FormNewProduct> {
                             context,
                             MaterialPageRoute(
                               builder: (context) =>
-                                  const ListarProductosAdmin(),
+                                  const ListarProductos(),
                             ),
                           );
                         },

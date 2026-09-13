@@ -1,7 +1,7 @@
-import 'package:farmayopin/pages/admin/listar_productos_admin.dart';
 import 'package:farmayopin/pages/cliente/listar_productos.dart';
 import 'package:farmayopin/pages/noRol/registrar.dart';
 import 'package:farmayopin/services/pocketbase_service.dart';
+import 'package:farmayopin/widgets/formularios/form_input_decoration.dart';
 import 'package:farmayopin/widgets/glass_card.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -46,17 +46,10 @@ class _FormLogInState extends State<FormLogIn> {
             backgroundColor: Colors.green,
           ),
         );
-        if(usuario.get<String>('role') == 'cliente') {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const ListarProductos()),
-          );
-        } else if (usuario.get<String>('role') == 'admin') {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const ListarProductosAdmin()),
-          );
-        }
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const ListarProductos()),
+        );
         
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -94,18 +87,8 @@ class _FormLogInState extends State<FormLogIn> {
             TextFormField(
               controller: _emailController,
               keyboardType: TextInputType.emailAddress,
-              decoration: InputDecoration(
+              decoration: FormInputDecoration.campo(
                 hintText: 'johndoe@gmail.com',
-                filled: true,
-                fillColor: Colors.white,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: Color(0xFFD9D9D9)),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: Color(0xFFD9D9D9)),
-                ),
               ),
               validator: (value) {
                 if (value == null || value.isEmpty) {
@@ -138,18 +121,8 @@ class _FormLogInState extends State<FormLogIn> {
             TextFormField(
               controller: _passwordController,
               obscureText: true,
-              decoration: InputDecoration(
+              decoration: FormInputDecoration.campo(
                 hintText: 'Contraseña',
-                filled: true,
-                fillColor: Colors.white,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: Color(0xFFD9D9D9)),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: Color(0xFFD9D9D9)),
-                ),
               ),
               validator: (value) {
                 if (value == null || value.isEmpty) {

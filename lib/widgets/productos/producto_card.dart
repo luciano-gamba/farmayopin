@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:farmayopin/models/producto.dart';
+import 'package:farmayopin/pages/cliente/ver_producto.dart';
 import 'package:farmayopin/services/cache_service.dart';
 import 'package:flutter/material.dart';
 
@@ -15,6 +16,18 @@ class ProductoCard extends StatelessWidget{
   @override
   Widget build(BuildContext context) {
     return Card(
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => VerProducto(
+                producto: producto,
+              ),
+            ),
+          );
+        },
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -60,6 +73,7 @@ class ProductoCard extends StatelessWidget{
           ],
         ),
       ),
+    ),
     );
   }
 }

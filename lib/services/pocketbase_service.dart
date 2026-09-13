@@ -58,6 +58,16 @@ class PocketBaseService {
     await pb.collection('usuarios').requestPasswordReset(email);
   }
 
+  bool get esAdmin {
+    final usuario = pb.authStore.record;
+
+    if (usuario == null) {
+      return false;
+    }
+
+    return usuario.getStringValue('role') == 'admin';
+  }
+
   // =========================
   // PRODUCTOS
   // =========================

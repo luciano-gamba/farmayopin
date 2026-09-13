@@ -1,4 +1,6 @@
+import 'package:farmayopin/services/pocketbase_service.dart';
 import 'package:farmayopin/widgets/floating_buttons.dart';
+import 'package:farmayopin/widgets/productos/floating_add_product_button.dart';
 import 'package:farmayopin/widgets/productos/productos_screen.dart'; // Ajusta la ruta
 import 'package:flutter/material.dart';
 
@@ -7,6 +9,8 @@ class ListarProductos extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final pocketBaseService = PocketBaseService();
+
     return Scaffold(
       body: Container(
         // 1. Agregamos la imagen de fondo desde tus assets
@@ -25,7 +29,9 @@ class ListarProductos extends StatelessWidget {
           child: ProductosScreen(),
         ),
       ),
-      floatingActionButton: floatingButtons(),
+      floatingActionButton: pocketBaseService.esAdmin
+      ? FloatingAddButton()
+      : floatingButtons(),
     );
   }
 }

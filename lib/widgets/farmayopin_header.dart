@@ -1,17 +1,23 @@
 // lib/widgets/farmayopin_header.dart
+import 'package:farmayopin/pages/cliente/listar_productos.dart';
 import 'package:farmayopin/widgets/glass_card.dart';
 import 'package:flutter/material.dart';
 
 class FarmayopinHeader extends StatelessWidget {
-  const FarmayopinHeader({super.key});
+  final VoidCallback? onVolver;
+
+  const FarmayopinHeader({
+    super.key,
+    this.onVolver,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return const GlassCard(
+    final header = GlassCard(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
+          const Text(
             'farmayopin',
             textAlign: TextAlign.center,
             style: TextStyle(
@@ -33,6 +39,15 @@ class FarmayopinHeader extends StatelessWidget {
           ),
         ],
       ),
+    );
+    
+    if(onVolver == null) {
+      return header;
+    }
+
+    return GestureDetector(
+      onTap: onVolver,
+      child: header,
     );
   }
 }

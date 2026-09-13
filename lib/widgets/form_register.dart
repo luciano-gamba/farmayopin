@@ -1,6 +1,7 @@
 import 'package:farmayopin/pages/cliente/listar_productos.dart';
 import 'package:farmayopin/pages/noRol/ingresar.dart';
 import 'package:farmayopin/services/pocketbase_service.dart';
+import 'package:farmayopin/widgets/formularios/form_input_decoration.dart';
 import 'package:farmayopin/widgets/glass_card.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -96,7 +97,9 @@ class _FormRegisterState extends State<FormRegister> {
             TextFormField(
               controller: _emailController,
               keyboardType: TextInputType.emailAddress,
-              decoration: _inputDecoration('johndoe@gmail.com'),
+              decoration: FormInputDecoration.campo(
+                hintText: 'johndoe@gmail.com',
+              ),
               validator: (value) {
                 if (value == null || value.trim().isEmpty) {
                   return 'El email es requerido';
@@ -115,7 +118,9 @@ class _FormRegisterState extends State<FormRegister> {
             TextFormField(
               controller: _passwordController,
               obscureText: true,
-              decoration: _inputDecoration('••••••••'),
+              decoration: FormInputDecoration.campo(
+                hintText: '••••••••'
+              ),
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'La contraseña es requerida';
@@ -133,7 +138,9 @@ class _FormRegisterState extends State<FormRegister> {
             TextFormField(
               controller: _confirmPasswordController,
               obscureText: true,
-              decoration: _inputDecoration('••••••••'),
+              decoration: FormInputDecoration.campo(
+                hintText: '••••••••'
+              ),
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Confirma tu contraseña';
@@ -150,7 +157,9 @@ class _FormRegisterState extends State<FormRegister> {
             const SizedBox(height: 8),
             TextFormField(
               controller: _nameController,
-              decoration: _inputDecoration('John Doe'),
+              decoration: FormInputDecoration.campo(
+                hintText: 'John Doe'
+              ),
               validator: (value) {
                 if (value == null || value.trim().isEmpty) {
                   return 'El nombre es requerido';
@@ -171,7 +180,9 @@ class _FormRegisterState extends State<FormRegister> {
                     textAlign: TextAlign.center,
                     keyboardType: TextInputType.number,
                     maxLength: 2,
-                    decoration: _inputDecoration('DD')
+                    decoration: FormInputDecoration.campo(
+                      hintText: 'DD'
+                    )
                         .copyWith(counterText: ''),
                     validator: (value) {
                       if (value == null || value.isEmpty) return 'Día';

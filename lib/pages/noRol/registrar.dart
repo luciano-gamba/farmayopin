@@ -1,5 +1,5 @@
 import 'package:farmayopin/widgets/farmayopin_header.dart';
-import 'package:farmayopin/widgets/formregister.dart';
+import 'package:farmayopin/widgets/form_register.dart';
 import 'package:farmayopin/widgets/main_layout.dart';
 import 'package:flutter/material.dart';
 
