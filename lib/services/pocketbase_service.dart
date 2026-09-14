@@ -1,11 +1,12 @@
 // Aca ira la conexion con pocketbase
 import 'dart:io';
+
+import 'package:farmayopin/models/item.dart';
 import 'package:farmayopin/models/producto.dart';
 import 'package:pocketbase/pocketbase.dart';
 import 'package:http/http.dart' as http;
 
 class PocketBaseService {
-
   static final PocketBaseService _instance = PocketBaseService._internal();
 
   factory PocketBaseService() {
@@ -14,7 +15,8 @@ class PocketBaseService {
 
   PocketBaseService._internal();
 
-  final pb = PocketBase('http://10.0.2.2:8090');
+  //final pb = PocketBase('http://10.0.2.2:8090');
+  final pb = PocketBase('http://127.0.0.1:8090');
 
   // =========================
   // AUTENTICACIÓN
@@ -125,5 +127,118 @@ class PocketBaseService {
   Future<void> revisarServicio() async {
     print('Sesión válida: ${pb.authStore.isValid}');
     print('Usuario autenticado: ${pb.authStore.record}');
+  }
+
+  // =========================
+  // ORDENES / ITEMS
+  // =========================
+  Future<void> recalcularTotalOrden(String miOrdenId) async {
+    try {
+      final orden = await pb
+          .collection('ordenes')
+          .getOne(miOrdenId, expand: 'misItems');
+
+      double nuevoImporteTotal = 0;
+
+      final itemsExpandidos = orden.get<List<Item>>("misItems");
+
+      if (itemsExpandidos.isNotEmpty) {
+        for (final item in itemsExpandidos) {
+          final cantidad = item.cantidad;
+          final precioUnitario = item.precioUnitario;
+          nuevoImporteTotal += cantidad * precioUnitario;
+        }
+      }
+      await pb
+          .collection('ordenes')
+          .update(miOrdenId, body: {'importeTotal': nuevoImporteTotal});
+
+      print("Importe total recalculado con expand: $nuevoImporteTotal");
+    } catch (e) {
+      print("Error al recalcular el total con expand: $e");
+    }
+  }
+
+  Future<void> agregarItem(Producto producto, int cantidad) async {
+    final usuario = pb.authStore.record!;
+    final String miOrdenId = usuario.get<String>("miOrden");
+    try {
+      if (miOrdenId.isEmpty) {
+        final nuevaOrden = await pb
+            .collection('ordenes')
+            .create(body: {'miUsuario': usuario.id});
+
+        await pb
+            .collection('usuarios')
+            .update(usuario.id, body: {'miOrden': nuevaOrden.id});
+
+        await pb.collection('usuarios').authRefresh();
+
+        final nuevoItem = await pb
+            .collection('items')
+            .create(
+              body: {
+                'miOrden': nuevaOrden.id,
+                'miProducto': producto.id,
+                'cantidad': cantidad,
+                'precioUnitario': producto.precio,
+              },
+            );
+        await pb
+            .collection('ordenes')
+            .update(nuevaOrden.id, body: {'+misItems': nuevoItem.id});
+
+        await recalcularTotalOrden(nuevaOrden.id);
+        print("Nueva orden creada y primer producto agregado.");
+      } else {
+        final itemsExistentes = await pb
+            .collection('items')
+            .getList(
+              page: 1,
+              perPage: 1,
+              filter: 'miOrden = "$miOrdenId" && miProducto = "${producto.id}"',
+            );
+
+        if (itemsExistentes.items.isNotEmpty) {
+          final item = itemsExistentes.items.first;
+          var nuevaCantidad = item.get<int>('cantidad') + cantidad;
+
+          if (nuevaCantidad > producto.stock) {
+            nuevaCantidad = producto.stock;
+          }
+
+          await pb
+              .collection('items')
+              .update(item.id, body: {'cantidad': nuevaCantidad});
+        } else {
+          final nuevoItem = await pb
+              .collection('items')
+              .create(
+                body: {
+                  'miOrden': miOrdenId,
+                  'miProducto': producto.id,
+                  'cantidad': cantidad,
+                  'precioUnitario': producto.precio,
+                },
+              );
+          await pb
+              .collection('ordenes')
+              .update(miOrdenId, body: {'+misItems': nuevoItem.id});
+        }
+        await recalcularTotalOrden(miOrdenId);
+        print("Producto añadido a la orden existente.");
+      }
+    } catch (e) {
+      print("Error al gestionar la orden: $e");
+    }
+  }
+
+  Future<RecordModel> verCarrito() async {
+    final usuario = pb.authStore.record!;
+    final String miOrdenId = usuario.get<String>("miOrden");
+    final record = await pb
+        .collection('ordenes')
+        .getOne(miOrdenId, expand: 'relField1,relField2.subRelField');
+    return record;
   }
 }

@@ -1,4 +1,6 @@
 import 'package:farmayopin/models/producto.dart';
+import 'package:farmayopin/pages/cliente/listar_productos.dart';
+import 'package:farmayopin/services/pocketbase_service.dart';
 import 'package:flutter/material.dart';
 
 class AccionesProducto extends StatefulWidget {
@@ -16,6 +18,7 @@ class AccionesProducto extends StatefulWidget {
 }
 
 class _AccionesProductoState extends State<AccionesProducto> {
+  final PocketBaseService pocketBaseService = PocketBaseService();
   int cantidad = 1;
 
   void _aumentarCantidad() {
@@ -35,14 +38,17 @@ class _AccionesProductoState extends State<AccionesProducto> {
   }
 
   void _agregarAlCarrito() {
-    // Acá irá posteriormente la lógica para agregar al carrito.
-
+    pocketBaseService.agregarItem(widget.producto, cantidad);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
           '$cantidad unidad${cantidad == 1 ? '' : 'es'} agregada${cantidad == 1 ? '' : 's'} al carrito',
         ),
       ),
+    );
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => const ListarProductos()),
     );
   }
 
@@ -82,10 +88,7 @@ class _AccionesProductoState extends State<AccionesProducto> {
       children: [
         const Text(
           'Cantidad',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
 
         const SizedBox(height: 8),
@@ -99,10 +102,7 @@ class _AccionesProductoState extends State<AccionesProducto> {
             ),
 
             Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 20,
-                vertical: 8,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
               child: Text(
                 '$cantidad',
                 style: const TextStyle(
@@ -124,9 +124,7 @@ class _AccionesProductoState extends State<AccionesProducto> {
         const SizedBox(height: 12),
 
         ElevatedButton.icon(
-          onPressed: widget.producto.stock > 0
-              ? _agregarAlCarrito
-              : null,
+          onPressed: widget.producto.stock > 0 ? _agregarAlCarrito : null,
           icon: const Icon(Icons.shopping_cart),
           label: const Text('Agregar al carrito'),
         ),
