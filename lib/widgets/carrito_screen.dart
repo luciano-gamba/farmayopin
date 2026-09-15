@@ -39,9 +39,38 @@ class _CarritoScreenState extends State<CarritoScreen> {
               borderRadius: BorderRadius.circular(15),
               border: Border.all(color: const Color(0xFFD9D9D9)),
             ),
-            child: Text(
-              'Tu carrito está vacío.',
-              style: TextStyle(fontFamily: 'Inter', fontSize: 16),
+            child: SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const ListarProductos(),
+                    ),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF5A5A5A),
+                  foregroundColor: const Color(0xFFF5F5F5),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                icon: const Icon(
+                  Icons.shopping_cart_outlined,
+                  color: Colors.white,
+                ),
+                label: const Text(
+                  'Buscar productos',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontFamily: 'Inter',
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+              ),
             ),
           );
         }
@@ -136,7 +165,6 @@ class _CarritoScreenState extends State<CarritoScreen> {
                           ),
                         ),
 
-                        // Tu botón modificado para refrescar en tiempo real
                         IconButton(
                           icon: const Icon(
                             Icons.close,

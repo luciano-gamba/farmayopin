@@ -166,13 +166,21 @@ class PocketBaseService {
   Future<void> restarCantidadItem(String idItem, int sustraendo) async {
     try {
       final item = await pb.collection('items').getOne(idItem);
-      final minuendo = item.getIntValue('cantidad');
-      if (minuendo <= sustraendo) {
+      final cantidadVieja = item.getIntValue('cantidad');
+      if (cantidadVieja <= sustraendo) {
+        await restarTotalOrden(
+          item.get('miOrden'),
+          item.getDoubleValue('precioUnitario') * cantidadVieja,
+        );
         await pb.collection('items').delete(idItem);
       } else {
+        await restarTotalOrden(
+          item.get('miOrden'),
+          item.getDoubleValue('precioUnitario') * sustraendo,
+        );
         await pb
             .collection('items')
-            .update(idItem, body: {'cantidad': minuendo - sustraendo});
+            .update(idItem, body: {'cantidad': cantidadVieja - sustraendo});
       }
     } catch (e) {
       print("Error al res al total: $e");
