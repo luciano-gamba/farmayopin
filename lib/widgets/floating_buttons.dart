@@ -1,3 +1,4 @@
+import 'package:farmayopin/pages/cliente/ver_carrito.dart';
 import 'package:flutter/material.dart';
 
 class floatingButtons extends StatelessWidget {
@@ -24,7 +25,10 @@ class floatingButtons extends StatelessWidget {
         FloatingActionButton(
           heroTag: 'btn_carrito', // Evita el error de pantalla negra
           onPressed: () {
-            // Acción para el botón del carrito
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const VerCarrito()),
+            );
           },
           backgroundColor: const Color(0xFFDC0000), // Tu color rojo
           shape: const CircleBorder(),

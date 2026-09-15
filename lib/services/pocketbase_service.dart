@@ -1,7 +1,6 @@
 // Aca ira la conexion con pocketbase
 import 'dart:io';
 
-import 'package:farmayopin/models/item.dart';
 import 'package:farmayopin/models/producto.dart';
 import 'package:pocketbase/pocketbase.dart';
 import 'package:http/http.dart' as http;
@@ -132,30 +131,51 @@ class PocketBaseService {
   // =========================
   // ORDENES / ITEMS
   // =========================
-  Future<void> recalcularTotalOrden(String miOrdenId) async {
+  Future<void> sumarTotalOrden(String miOrdenId, double sumando) async {
     try {
-      final orden = await pb
-          .collection('ordenes')
-          .getOne(miOrdenId, expand: 'misItems');
+      final record = await pb.collection('ordenes').getOne(miOrdenId);
+      final double importeTotal = record.getDoubleValue("importeTotal");
+      final nuevoImporteTotal = importeTotal + sumando;
 
-      double nuevoImporteTotal = 0;
-
-      final itemsExpandidos = orden.get<List<Item>>("misItems");
-
-      if (itemsExpandidos.isNotEmpty) {
-        for (final item in itemsExpandidos) {
-          final cantidad = item.cantidad;
-          final precioUnitario = item.precioUnitario;
-          nuevoImporteTotal += cantidad * precioUnitario;
-        }
-      }
       await pb
           .collection('ordenes')
           .update(miOrdenId, body: {'importeTotal': nuevoImporteTotal});
 
-      print("Importe total recalculado con expand: $nuevoImporteTotal");
+      print("Importe total recalculado: $nuevoImporteTotal");
     } catch (e) {
-      print("Error al recalcular el total con expand: $e");
+      print("Error al sumar al total: $e");
+    }
+  }
+
+  Future<void> restarTotalOrden(String miOrdenId, double sustraendo) async {
+    try {
+      final record = await pb.collection('ordenes').getOne(miOrdenId);
+      final double importeTotal = record.getDoubleValue("importeTotal");
+      final nuevoImporteTotal = importeTotal - sustraendo;
+
+      await pb
+          .collection('ordenes')
+          .update(miOrdenId, body: {'importeTotal': nuevoImporteTotal});
+
+      print("Importe total recalculado: $nuevoImporteTotal");
+    } catch (e) {
+      print("Error al restar al total: $e");
+    }
+  }
+
+  Future<void> restarCantidadItem(String idItem, int sustraendo) async {
+    try {
+      final item = await pb.collection('items').getOne(idItem);
+      final minuendo = item.getIntValue('cantidad');
+      if (minuendo <= sustraendo) {
+        await pb.collection('items').delete(idItem);
+      } else {
+        await pb
+            .collection('items')
+            .update(idItem, body: {'cantidad': minuendo - sustraendo});
+      }
+    } catch (e) {
+      print("Error al res al total: $e");
     }
   }
 
@@ -182,13 +202,14 @@ class PocketBaseService {
                 'miProducto': producto.id,
                 'cantidad': cantidad,
                 'precioUnitario': producto.precio,
+                'nombre': producto.nombre,
               },
             );
         await pb
             .collection('ordenes')
             .update(nuevaOrden.id, body: {'+misItems': nuevoItem.id});
 
-        await recalcularTotalOrden(nuevaOrden.id);
+        await sumarTotalOrden(nuevaOrden.id, producto.precio * cantidad);
         print("Nueva orden creada y primer producto agregado.");
       } else {
         final itemsExistentes = await pb
@@ -219,13 +240,14 @@ class PocketBaseService {
                   'miProducto': producto.id,
                   'cantidad': cantidad,
                   'precioUnitario': producto.precio,
+                  'nombre': producto.nombre,
                 },
               );
           await pb
               .collection('ordenes')
               .update(miOrdenId, body: {'+misItems': nuevoItem.id});
         }
-        await recalcularTotalOrden(miOrdenId);
+        await sumarTotalOrden(miOrdenId, producto.precio * cantidad);
         print("Producto añadido a la orden existente.");
       }
     } catch (e) {
@@ -233,12 +255,18 @@ class PocketBaseService {
     }
   }
 
-  Future<RecordModel> verCarrito() async {
+  Future<(List<RecordModel>, double)> obtenerCarrito() async {
     final usuario = pb.authStore.record!;
     final String miOrdenId = usuario.get<String>("miOrden");
+
     final record = await pb
         .collection('ordenes')
-        .getOne(miOrdenId, expand: 'relField1,relField2.subRelField');
-    return record;
+        .getOne(miOrdenId, expand: 'misItems');
+
+    final List<RecordModel> items = record.getListValue('expand.misItems');
+
+    double total = record.getDoubleValue('importeTotal');
+
+    return (items, total);
   }
 }
