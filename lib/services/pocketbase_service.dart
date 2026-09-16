@@ -14,8 +14,8 @@ class PocketBaseService {
 
   PocketBaseService._internal();
 
-  final pb = PocketBase('http://10.0.2.2:8090');
-  //final pb = PocketBase('http://127.0.0.1:8090');
+  //final pb = PocketBase('http://10.0.2.2:8090');
+  final pb = PocketBase('http://127.0.0.1:8090');
 
   // =========================
   // AUTENTICACIÓN
@@ -139,19 +139,17 @@ class PocketBaseService {
     if (stock != null) body['stock'] = stock;
 
     final files = imagenProducto != null
-      ? [
-        await http.MultipartFile.fromPath(
-          'imagenProducto',
-          imagenProducto.path,
-          ),
-      ]
-      : <http.MultipartFile>[];
+        ? [
+            await http.MultipartFile.fromPath(
+              'imagenProducto',
+              imagenProducto.path,
+            ),
+          ]
+        : <http.MultipartFile>[];
 
-    final  record = await pb.collection('productos').update(
-      id,
-      body: body,
-      files: files
-    );
+    final record = await pb
+        .collection('productos')
+        .update(id, body: body, files: files);
 
     return record;
   }
@@ -298,7 +296,7 @@ class PocketBaseService {
 
   Future<(List<RecordModel>, double, String)> obtenerCarrito() async {
     final usuario = pb.authStore.record!;
-    final String miOrdenId = usuario.get<String>("miOrden");
+    final String miOrdenId = usuario.getStringValue("miOrden");
 
     final record = await pb
         .collection('ordenes')
@@ -325,7 +323,16 @@ class PocketBaseService {
       if (stock >= cantidad) {
         await pb
             .collection('productos')
-            .update(producto.id, body: {'stock': stock - cantidad});
+            .update(
+              producto.id,
+              body: {'stock': stock - cantidad, '+miHistorial': item.id},
+            );
+        await pb
+            .collection('items')
+            .update(
+              item.id,
+              body: {'fechaCompletada': DateTime.now().toIso8601String()},
+            );
       } else {
         restarCantidadItem(
           item.id,
@@ -335,7 +342,10 @@ class PocketBaseService {
     }
     await pb
         .collection('ordenes')
-        .update(idOrden, body: {'fechaCompletada': DateTime.now()});
+        .update(
+          idOrden,
+          body: {'fechaCompletada': DateTime.now().toIso8601String()},
+        );
     await pb
         .collection('usuarios')
         .update(
