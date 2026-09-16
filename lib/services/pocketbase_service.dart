@@ -263,7 +263,7 @@ class PocketBaseService {
     }
   }
 
-  Future<(List<RecordModel>, double)> obtenerCarrito() async {
+  Future<(List<RecordModel>, double, String)> obtenerCarrito() async {
     final usuario = pb.authStore.record!;
     final String miOrdenId = usuario.get<String>("miOrden");
 
@@ -275,6 +275,39 @@ class PocketBaseService {
 
     double total = record.getDoubleValue('importeTotal');
 
-    return (items, total);
+    return (items, total, miOrdenId);
+  }
+
+  Future<void> pagarCarrito(String idOrden) async {
+    final orden = await pb
+        .collection('ordenes')
+        .getOne(idOrden, expand: 'misItems');
+    final List<RecordModel> items = orden.getListValue('expand.misItems');
+    for (var item in items) {
+      final producto = await pb
+          .collection('productos')
+          .getOne(item.getStringValue('miProducto'));
+      final stock = producto.getIntValue('stock');
+      final cantidad = item.getIntValue('cantidad');
+      if (stock >= cantidad) {
+        await pb
+            .collection('productos')
+            .update(producto.id, body: {'stock': stock - cantidad});
+      } else {
+        restarCantidadItem(
+          item.id,
+          cantidad,
+        ); //Elimina el item de la orden para prevenir errores
+      }
+    }
+    await pb
+        .collection('ordenes')
+        .update(idOrden, body: {'fechaCompletada': DateTime.now()});
+    await pb
+        .collection('usuarios')
+        .update(
+          orden.getStringValue('miUsuario'),
+          body: {'+misOrdenes': orden.id, 'miOrden-': orden.id},
+        );
   }
 }

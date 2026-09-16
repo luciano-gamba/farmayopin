@@ -18,7 +18,7 @@ class _CarritoScreenState extends State<CarritoScreen> {
   Widget build(BuildContext context) {
     final anchoPantalla = MediaQuery.of(context).size.width;
 
-    return FutureBuilder<(List<RecordModel>, double)>(
+    return FutureBuilder<(List<RecordModel>, double, String)>(
       // Cada vez que se llama a setState, el FutureBuilder vuelve a consultar al servicio
       future: pocketBaseService.obtenerCarrito(),
       builder: (context, snapshot) {
@@ -227,7 +227,12 @@ class _CarritoScreenState extends State<CarritoScreen> {
                   width: double.infinity,
                   height: 48,
                   child: ElevatedButton.icon(
-                    onPressed: () {
+                    onPressed: () async {
+                      if (!snapshot.hasError &&
+                          snapshot.hasData &&
+                          snapshot.data!.$3.isNotEmpty) {
+                        await pocketBaseService.pagarCarrito(snapshot.data!.$3);
+                      } else {}
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
