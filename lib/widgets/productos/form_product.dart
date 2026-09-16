@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:farmayopin/models/producto.dart';
 import 'package:farmayopin/pages/cliente/listar_productos.dart';
 import 'package:farmayopin/services/pocketbase_service.dart';
 import 'package:farmayopin/widgets/formularios/form_input_decoration.dart';
@@ -8,15 +9,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 
-class FormNewProduct extends StatefulWidget {
-  const FormNewProduct({super.key});
+class FormProduct extends StatefulWidget {
+  final Producto? producto;
+
+  const FormProduct({
+    super.key,
+    this.producto
+  });
   
 
   @override
-  State<FormNewProduct> createState() => _FormNewProductState();
+  State<FormProduct> createState() => _FormProductState();
 }
 
-class _FormNewProductState extends State<FormNewProduct> {
+class _FormProductState extends State<FormProduct> {
   final PocketBaseService pocketBaseService = PocketBaseService();
   final _formKey = GlobalKey<FormState>();
 
@@ -28,6 +34,17 @@ class _FormNewProductState extends State<FormNewProduct> {
   File? _imagenSeleccionada;
   bool _guardando = false;
 
+  @override
+  void initState() {
+    super.initState();
+
+    if (widget.producto != null) {
+      _nombreController.text = widget.producto!.nombre;
+      _precioController.text = widget.producto!.precio.toString();
+      _stockController.text = widget.producto!.stock.toString();
+      _detalleController.text = widget.producto!.descripcion ?? '';
+    }
+  }
   Future<void> _seleccionarImagen() async {
     final picker = ImagePicker();
 
@@ -64,8 +81,14 @@ class _FormNewProductState extends State<FormNewProduct> {
     _detalleController.dispose();
     super.dispose();
   }
-
-  Future<void> _guardarProducto() async {
+  void _guardar() {
+    if (widget.producto == null) {
+      _crearProducto();
+    } else {
+      _editarProducto();
+    }
+  }
+  Future<void> _crearProducto() async {
     if(_guardando) return;
 
     if (!_formKey.currentState!.validate()) {
@@ -112,6 +135,47 @@ class _FormNewProductState extends State<FormNewProduct> {
     }
   }
 
+  Future<void> _editarProducto() async {
+    if (_guardando) return;
+
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    setState(() {
+      _guardando = true;
+    });
+
+    try {
+      final producto = await pocketBaseService.editarProducto(
+        id: widget.producto!.id,
+        nombre: _nombreController.text.trim(),
+        precio: double.parse(_precioController.text.replaceAll(',', '.')),
+        stock: int.parse(_stockController.text),
+        imagenProducto: _imagenSeleccionada,
+        descripcion: _detalleController.text.trim(),
+      );
+
+      print('Producto editado: ${producto.id}');
+      if (!mounted) return;
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const ListarProductos()),
+      );
+    } catch (e) {
+      print('ERROR AL EDITAR el PRODUCTO: $e');
+      if (!mounted) return;
+
+      setState(() {
+        _guardando = false;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Error al guardar el producto')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Form(
@@ -127,6 +191,7 @@ class _FormNewProductState extends State<FormNewProduct> {
                 // Imagen
                 ImagePickerField(
                   imagen: _imagenSeleccionada,
+                  imagenActual: widget.producto?.imagen,
                   onSeleccionar: _seleccionarImagen,
                 ),
 
@@ -306,7 +371,7 @@ class _FormNewProductState extends State<FormNewProduct> {
 
                     Expanded(
                       child: ElevatedButton(
-                        onPressed: _guardando ? null : _guardarProducto,
+                        onPressed: _guardando ? null : _guardar,
                         child: _guardando
                             ? const SizedBox(
                                 width: 20,
@@ -315,7 +380,11 @@ class _FormNewProductState extends State<FormNewProduct> {
                                   strokeWidth: 2,
                                 ),
                               )
-                            : const Text('Guardar Producto'),
+                            :  Text(
+                                widget.producto == null
+                                ? 'Guardar Producto'
+                                : 'Guardar Cambios',
+                                ),
                       ),
                     ),
                   ],

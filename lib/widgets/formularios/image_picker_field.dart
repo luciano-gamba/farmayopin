@@ -5,9 +5,11 @@ import 'package:flutter/material.dart';
 class ImagePickerField extends StatelessWidget {
   final File? imagen;
   final VoidCallback onSeleccionar;
+  final String? imagenActual;
 
   const ImagePickerField({
     super.key,
+    this.imagenActual,
     required this.imagen,
     required this.onSeleccionar,
   });
@@ -44,6 +46,11 @@ class ImagePickerField extends StatelessWidget {
                     borderRadius: BorderRadius.circular(8),
                     child: Image.file(imagen!, fit: BoxFit.contain),
                   )
+                : imagenActual != null
+                  ? ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Image.network(imagenActual!, fit: BoxFit.contain),
+                    )
                 : const Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [

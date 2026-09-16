@@ -1,4 +1,5 @@
 import 'package:farmayopin/models/producto.dart';
+import 'package:farmayopin/pages/admin/editar_producto.dart';
 import 'package:farmayopin/pages/cliente/listar_productos.dart';
 import 'package:farmayopin/services/pocketbase_service.dart';
 import 'package:flutter/material.dart';
@@ -54,10 +55,14 @@ class _AccionesProductoState extends State<AccionesProducto> {
 
   void _editarProducto() {
     // Acá irá la navegación hacia editar producto.
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => EditarProducto(producto: widget.producto)),
+    );
   }
 
-  void _eliminarProducto() {
-    // Acá irá posteriormente la confirmación y eliminación.
+  void _historicoProducto() {
+    // Acá irá la navegacion hacia historico de producto.
   }
 
   @override
@@ -67,17 +72,36 @@ class _AccionesProductoState extends State<AccionesProducto> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           ElevatedButton.icon(
-            onPressed: _editarProducto,
-            icon: const Icon(Icons.edit),
-            label: const Text('Editar producto'),
+            onPressed: _historicoProducto,
+            icon: const Icon(Icons.access_time_outlined, color: Colors.white),
+            label: const Text(
+              'Ver Historico',
+              style: TextStyle(color: Colors.white),
+              ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.black87,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              )
+            ),
           ),
-
+          
           const SizedBox(height: 12),
 
           ElevatedButton.icon(
-            onPressed: _eliminarProducto,
-            icon: const Icon(Icons.delete),
-            label: const Text('Eliminar producto'),
+            onPressed: _editarProducto,
+            icon: const Icon(Icons.edit),
+            label: const Text('Editar producto',
+              style: TextStyle(color: Colors.white),
+            ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.grey.shade700,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
           ),
         ],
       );
@@ -127,6 +151,13 @@ class _AccionesProductoState extends State<AccionesProducto> {
           onPressed: widget.producto.stock > 0 ? _agregarAlCarrito : null,
           icon: const Icon(Icons.shopping_cart),
           label: const Text('Agregar al carrito'),
+           style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.black87,
+            foregroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
         ),
       ],
     );

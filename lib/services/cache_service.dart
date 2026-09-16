@@ -22,14 +22,14 @@ class CacheService {
   }
 
   static Future<File> descargarImagen(String url) async {
-    print('CACHE: buscando imagen: $url');
+    // print('CACHE: buscando imagen: $url');
 
     final fileInfo = await _cacheManager.getFileFromCache(url);
 
     if (fileInfo != null) {
-      print('CACHE: imagen encontrada en cache');
-      print('CACHE: archivo: ${fileInfo.file.path}');
-      print('CACHE: válida hasta: ${fileInfo.validTill}');
+      // print('CACHE: imagen encontrada en cache');
+      // print('CACHE: archivo: ${fileInfo.file.path}');
+      // print('CACHE: válida hasta: ${fileInfo.validTill}');
 
       return fileInfo.file;
     }

@@ -14,8 +14,8 @@ class PocketBaseService {
 
   PocketBaseService._internal();
 
-  //final pb = PocketBase('http://10.0.2.2:8090');
-  final pb = PocketBase('http://127.0.0.1:8090');
+  final pb = PocketBase('http://10.0.2.2:8090');
+  //final pb = PocketBase('http://127.0.0.1:8090');
 
   // =========================
   // AUTENTICACIÓN
@@ -119,6 +119,39 @@ class PocketBaseService {
             ),
           ],
         );
+
+    return record;
+  }
+
+  Future<RecordModel> editarProducto({
+    required String id,
+    String? nombre,
+    double? precio,
+    int? stock,
+    File? imagenProducto,
+    String? descripcion,
+  }) async {
+    final body = <String, dynamic>{};
+
+    if (nombre != null) body['nombre'] = nombre;
+    if (descripcion != null) body['descripcion'] = descripcion;
+    if (precio != null) body['precio'] = precio;
+    if (stock != null) body['stock'] = stock;
+
+    final files = imagenProducto != null
+      ? [
+        await http.MultipartFile.fromPath(
+          'imagenProducto',
+          imagenProducto.path,
+          ),
+      ]
+      : <http.MultipartFile>[];
+
+    final  record = await pb.collection('productos').update(
+      id,
+      body: body,
+      files: files
+    );
 
     return record;
   }
