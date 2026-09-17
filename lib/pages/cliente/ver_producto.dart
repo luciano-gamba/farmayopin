@@ -6,65 +6,58 @@ import 'package:farmayopin/widgets/productos/actions_product.dart';
 import 'package:farmayopin/widgets/productos/information_product.dart';
 import 'package:flutter/material.dart';
 
-class VerProducto extends StatefulWidget{
+class VerProducto extends StatefulWidget {
   final Producto producto;
 
-  const VerProducto({
-    super.key,
-    required this.producto,
-  });
+  const VerProducto({super.key, required this.producto});
   @override
   State<VerProducto> createState() => _VerProductoState();
 }
 
-  class _VerProductoState extends State<VerProducto> {
-    int cantidad = 1;
-    
-    @override
-    Widget build(BuildContext context) {
-      final producto = widget.producto;
+class _VerProductoState extends State<VerProducto> {
+  int cantidad = 1;
 
-      return MainLayout(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [ 
-            FarmayopinHeader(onVolver: () {
-                Navigator.pop(context);
-              },
-            ),
-            const SizedBox(height: 20),
-            
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 34),
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(15),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    InformacionProducto(
-                      producto: producto,
-                    ),
+  @override
+  Widget build(BuildContext context) {
+    final producto = widget.producto;
 
-                    const SizedBox(height: 24),
+    return MainLayout(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          FarmayopinHeader(
+            onVolver: () {
+              Navigator.pop(context);
+            },
+          ),
+          const SizedBox(height: 20),
 
-                    AccionesProducto(
-                      producto: producto,
-                      esAdmin: PocketBaseService().esAdmin
-                    ),
-                  ],
-                ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 34),
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.80),
+                borderRadius: BorderRadius.circular(15),
               ),
-            )
-            ]
-        ),
-      );
-    }
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  InformacionProducto(producto: producto),
 
+                  const SizedBox(height: 24),
+
+                  AccionesProducto(
+                    producto: producto,
+                    esAdmin: PocketBaseService().esAdmin,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
-  
-
+}

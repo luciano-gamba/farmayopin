@@ -5,75 +5,75 @@ import 'package:farmayopin/pages/cliente/ver_producto.dart';
 import 'package:farmayopin/services/cache_service.dart';
 import 'package:flutter/material.dart';
 
-class ProductoCard extends StatelessWidget{
+class ProductoCard extends StatelessWidget {
   final Producto producto;
 
-  const ProductoCard({
-    super.key,
-    required this.producto,
-  });
+  const ProductoCard({super.key, required this.producto});
 
   @override
   Widget build(BuildContext context) {
     return Card(
+      color: Colors.white.withValues(alpha: 0.80),
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
         onTap: () {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => VerProducto(
-                producto: producto,
-              ),
+              builder: (context) => VerProducto(producto: producto),
             ),
           );
         },
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: FutureBuilder<File>(
-                future: CacheService.descargarImagen(producto.imagen),
-                builder: (context, snapshot) {
-                  print(
-                    'FutureBuilder: estado=${snapshot.connectionState}, '
-                    'error=${snapshot.error}',
-                  );
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: FutureBuilder<File>(
+                  future: CacheService.descargarImagen(producto.imagen),
+                  builder: (context, snapshot) {
+                    print(
+                      'FutureBuilder: estado=${snapshot.connectionState}, '
+                      'error=${snapshot.error}',
+                    );
 
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
 
-                  if (snapshot.hasError || !snapshot.hasData) {
-                    return const Center(child: Icon(Icons.broken_image));
-                  }
+                    if (snapshot.hasError || !snapshot.hasData) {
+                      return const Center(child: Icon(Icons.broken_image));
+                    }
 
-                  return Image.file(snapshot.data!, fit: BoxFit.contain);
-                },
+                    return Image.file(snapshot.data!, fit: BoxFit.contain);
+                  },
+                ),
               ),
-            ),
 
-            const SizedBox(height: 8),
+              const SizedBox(height: 8),
 
-            Text(producto.nombre, maxLines: 2, overflow: TextOverflow.ellipsis),
-
-            Text(
-              '\$${producto.precio}',
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-
-            if (producto.descripcion != null)
               Text(
-                producto.descripcion!,
+                producto.nombre,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
-          ],
+
+              Text(
+                '\$${producto.precio}',
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+
+              if (producto.descripcion != null)
+                Text(
+                  producto.descripcion!,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+            ],
+          ),
         ),
       ),
-    ),
     );
   }
 }

@@ -50,7 +50,6 @@ class _FormLogInState extends State<FormLogIn> {
           context,
           MaterialPageRoute(builder: (context) => const ListarProductos()),
         );
-        
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -121,9 +120,7 @@ class _FormLogInState extends State<FormLogIn> {
             TextFormField(
               controller: _passwordController,
               obscureText: true,
-              decoration: FormInputDecoration.campo(
-                hintText: 'Contraseña',
-              ),
+              decoration: FormInputDecoration.campo(hintText: 'Contraseña'),
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Ingresá tu contraseña';
