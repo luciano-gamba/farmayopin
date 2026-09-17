@@ -1,5 +1,5 @@
 import 'package:farmayopin/pages/cliente/listar_productos.dart';
-import 'package:farmayopin/widgets/carrito_screen.dart';
+import 'package:farmayopin/widgets/carritos/carrito_screen.dart';
 import 'package:farmayopin/widgets/farmayopin_header.dart';
 import 'package:farmayopin/widgets/main_layout.dart';
 import 'package:flutter/material.dart';

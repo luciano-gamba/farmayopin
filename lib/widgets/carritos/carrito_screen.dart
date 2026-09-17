@@ -3,7 +3,6 @@ import 'package:farmayopin/services/pocketbase_service.dart';
 import 'package:flutter/material.dart';
 import 'package:pocketbase/pocketbase.dart';
 
-// 1. Convertimos la pantalla en StatefulWidget
 class CarritoScreen extends StatefulWidget {
   const CarritoScreen({super.key});
 
@@ -19,7 +18,6 @@ class _CarritoScreenState extends State<CarritoScreen> {
     final anchoPantalla = MediaQuery.of(context).size.width;
 
     return FutureBuilder<(List<RecordModel>, double, String)>(
-      // Cada vez que se llama a setState, el FutureBuilder vuelve a consultar al servicio
       future: pocketBaseService.obtenerCarrito(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
@@ -75,7 +73,7 @@ class _CarritoScreenState extends State<CarritoScreen> {
           );
         }
 
-        final productos = snapshot.data!.$1;
+        final items = snapshot.data!.$1;
         final precioTotal = snapshot.data!.$2;
 
         return Center(
@@ -118,10 +116,12 @@ class _CarritoScreenState extends State<CarritoScreen> {
                 ),
 
                 // Lista de Tarjetas de Productos
-                ...productos.map((item) {
+                ...items.map((item) {
                   final nombre = item.data['nombre'] ?? 'Producto';
                   final precio = item.data['precioUnitario'] ?? 0;
                   final cantidad = item.data['cantidad'] ?? 1;
+                  int cantidadDialogo = item.data['cantidad'] ?? 1;
+                  var stock = 100;
 
                   return Container(
                     width: double.infinity,
@@ -137,7 +137,85 @@ class _CarritoScreenState extends State<CarritoScreen> {
                           child: InkWell(
                             borderRadius: BorderRadius.circular(4),
                             onTap: () {
-                              print('Se tocó el producto: $nombre');
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  // Usamos StatefulBuilder para actualizar los botones en tiempo real
+                                  return StatefulBuilder(
+                                    builder: (context, setDialogState) {
+                                      return AlertDialog(
+                                        title: Text(nombre),
+                                        content: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            IconButton(
+                                              onPressed: cantidadDialogo > 1
+                                                  ? () async {
+                                                      // Llamamos a tu función personalizada de resta
+                                                      await pocketBaseService
+                                                          .restarCantidadItem(
+                                                            item.id,
+                                                            1,
+                                                          );
+                                                      // Actualizamos el número dentro del diálogo
+                                                      setDialogState(() {
+                                                        cantidadDialogo--;
+                                                      });
+                                                      // Actualizamos la pantalla de fondo (refresca el FutureBuilder)
+                                                      setState(() {});
+                                                    }
+                                                  : null,
+                                              icon: const Icon(Icons.remove),
+                                            ),
+                                            Container(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    horizontal: 20,
+                                                    vertical: 8,
+                                                  ),
+                                              child: Text(
+                                                '$cantidadDialogo',
+                                                style: const TextStyle(
+                                                  fontSize: 20,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                            ),
+                                            IconButton(
+                                              onPressed: cantidadDialogo < stock
+                                                  ? () async {
+                                                      // Llamamos a tu función personalizada de suma
+                                                      stock =
+                                                          await pocketBaseService
+                                                              .sumarCantidadItem(
+                                                                item.id,
+                                                                1,
+                                                              );
+                                                      // Actualizamos el número dentro del diálogo
+                                                      setDialogState(() {
+                                                        cantidadDialogo++;
+                                                      });
+                                                      // Actualizamos la pantalla de fondo (refresca el FutureBuilder)
+                                                      setState(() {});
+                                                    }
+                                                  : null,
+                                              icon: const Icon(Icons.add),
+                                            ),
+                                          ],
+                                        ),
+                                        actions: [
+                                          TextButton(
+                                            onPressed: () =>
+                                                Navigator.pop(context),
+                                            child: const Text('Cerrar'),
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                  );
+                                },
+                              );
                             },
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -231,14 +309,48 @@ class _CarritoScreenState extends State<CarritoScreen> {
                       if (!snapshot.hasError &&
                           snapshot.hasData &&
                           snapshot.data!.$3.isNotEmpty) {
-                        await pocketBaseService.pagarCarrito(snapshot.data!.$3);
-                      } else {}
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const ListarProductos(),
-                        ),
-                      );
+                        try {
+                          await pocketBaseService.pagarCarrito(
+                            snapshot.data!.$3,
+                          );
+
+                          if (!context.mounted) return;
+
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Pago realizado con éxito'),
+                              backgroundColor: Colors.green,
+                            ),
+                          );
+
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const ListarProductos(),
+                            ),
+                          );
+                        } catch (error) {
+                          if (!context.mounted) return;
+
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                'Error al procesar el pago: $error',
+                              ),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                        }
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              'No hay productos en el carrito o los datos son inválidos.',
+                            ),
+                            backgroundColor: Colors.orange,
+                          ),
+                        );
+                      }
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFFDC0000),

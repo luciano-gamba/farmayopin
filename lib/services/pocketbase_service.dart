@@ -35,9 +35,13 @@ class PocketBaseService {
       'passwordConfirm': password,
     };
 
-    final record = await pb.collection('usuarios').create(body: body);
+    await pb.collection('usuarios').create(body: body);
 
-    return record;
+    final authData = await pb
+        .collection('usuarios')
+        .authWithPassword(email, password);
+
+    return authData.record;
   }
 
   Future<RecordModel> iniciarSesion({
@@ -47,7 +51,6 @@ class PocketBaseService {
     final authData = await pb
         .collection('usuarios')
         .authWithPassword(email, password);
-
     return authData.record;
   }
 
@@ -214,43 +217,76 @@ class PocketBaseService {
             .update(idItem, body: {'cantidad': cantidadVieja - sustraendo});
       }
     } catch (e) {
-      print("Error al res al total: $e");
+      print("Error al restar al total: $e");
+    }
+  }
+
+  Future<int> sumarCantidadItem(String idItem, int sumando) async {
+    try {
+      final item = await pb
+          .collection('items')
+          .getOne(idItem, expand: 'miProducto');
+      final cantidadVieja = item.getIntValue('cantidad');
+      final prod = item.get<RecordModel>('expand.miProducto');
+      if (cantidadVieja < prod.getDoubleValue('stock')) {
+        await sumarTotalOrden(
+          item.get('miOrden'),
+          item.getDoubleValue('precioUnitario') * sumando,
+        );
+        await pb
+            .collection('items')
+            .update(idItem, body: {'cantidad': cantidadVieja + sumando});
+      }
+      return prod.getIntValue('stock');
+    } catch (e) {
+      return 1;
     }
   }
 
   Future<void> agregarItem(Producto producto, int cantidad) async {
     final usuario = pb.authStore.record!;
-    final String miOrdenId = usuario.get<String>("miOrden");
+    final String miOrdenId = usuario.getStringValue('miOrden');
+
     try {
+      // CASO 1: El usuario no tiene una orden activa (Carrito vacío)
       if (miOrdenId.isEmpty) {
+        int cantidadNueva = cantidad > producto.stock
+            ? producto.stock
+            : cantidad;
         final nuevaOrden = await pb
             .collection('ordenes')
             .create(body: {'miUsuario': usuario.id});
 
+        // 2. Vincular la orden al usuario y refrescar sesión
         await pb
             .collection('usuarios')
             .update(usuario.id, body: {'miOrden': nuevaOrden.id});
-
         await pb.collection('usuarios').authRefresh();
 
+        // 3. Crear el ítem del producto
         final nuevoItem = await pb
             .collection('items')
             .create(
               body: {
                 'miOrden': nuevaOrden.id,
                 'miProducto': producto.id,
-                'cantidad': cantidad,
+                'cantidad': cantidadNueva,
                 'precioUnitario': producto.precio,
                 'nombre': producto.nombre,
               },
             );
+
+        // 4. Vincular el ítem a la orden y sumar el total correcto
         await pb
             .collection('ordenes')
             .update(nuevaOrden.id, body: {'+misItems': nuevoItem.id});
 
-        await sumarTotalOrden(nuevaOrden.id, producto.precio * cantidad);
+        await sumarTotalOrden(nuevaOrden.id, producto.precio * cantidadNueva);
         print("Nueva orden creada y primer producto agregado.");
-      } else {
+      }
+      // CASO 2: El usuario ya tiene una orden activa
+      else {
+        // Buscar si el producto ya está en esta orden
         final itemsExistentes = await pb
             .collection('items')
             .getList(
@@ -259,34 +295,68 @@ class PocketBaseService {
               filter: 'miOrden = "$miOrdenId" && miProducto = "${producto.id}"',
             );
 
+        // Sub-caso A: El producto YA existe en el carrito
         if (itemsExistentes.items.isNotEmpty) {
           final item = itemsExistentes.items.first;
-          var nuevaCantidad = item.get<int>('cantidad') + cantidad;
+          final viejaCantidad = item.getIntValue('cantidad');
 
+          var nuevaCantidad = viejaCantidad + cantidad;
+
+          // Validar límite de stock
           if (nuevaCantidad > producto.stock) {
             nuevaCantidad = producto.stock;
           }
 
+          // Calcular cuántas unidades REALES se están sumando en este intento
+          final int cantidadAgregadaReal = nuevaCantidad - viejaCantidad;
+
+          // Si no se añadieron unidades nuevas (porque ya estaba al máximo de stock)
+          if (cantidadAgregadaReal <= 0) {
+            print("No se agregaron más unidades: Alcanzó el límite de stock.");
+            return;
+          }
+
+          // Actualizar la cantidad en la base de datos
           await pb
               .collection('items')
               .update(item.id, body: {'cantidad': nuevaCantidad});
-        } else {
+
+          // Sumar al total de la orden solo el equivalente a las unidades reales agregadas
+          await sumarTotalOrden(
+            miOrdenId,
+            producto.precio * cantidadAgregadaReal,
+          );
+        }
+        // Sub-caso B: El producto NO existe en el carrito
+        else {
+          int cantidadNueva = cantidad > producto.stock
+              ? producto.stock
+              : cantidad;
+
+          if (cantidadNueva <= 0) {
+            print("No hay stock disponible para este producto.");
+            return;
+          }
+
           final nuevoItem = await pb
               .collection('items')
               .create(
                 body: {
                   'miOrden': miOrdenId,
                   'miProducto': producto.id,
-                  'cantidad': cantidad,
+                  'cantidad': cantidadNueva,
                   'precioUnitario': producto.precio,
                   'nombre': producto.nombre,
                 },
               );
+
           await pb
               .collection('ordenes')
               .update(miOrdenId, body: {'+misItems': nuevoItem.id});
+
+          await sumarTotalOrden(miOrdenId, producto.precio * cantidadNueva);
         }
-        await sumarTotalOrden(miOrdenId, producto.precio * cantidad);
+
         print("Producto añadido a la orden existente.");
       }
     } catch (e) {
@@ -310,47 +380,51 @@ class PocketBaseService {
   }
 
   Future<void> pagarCarrito(String idOrden) async {
-    final orden = await pb
-        .collection('ordenes')
-        .getOne(idOrden, expand: 'misItems');
-    final List<RecordModel> items = orden.getListValue('expand.misItems');
-    for (var item in items) {
-      final producto = await pb
-          .collection('productos')
-          .getOne(item.getStringValue('miProducto'));
-      final stock = producto.getIntValue('stock');
-      final cantidad = item.getIntValue('cantidad');
-      if (stock >= cantidad) {
-        await pb
+    try {
+      final orden = await pb
+          .collection('ordenes')
+          .getOne(idOrden, expand: 'misItems');
+      final List<RecordModel> items = orden.getListValue('expand.misItems');
+      for (var item in items) {
+        final producto = await pb
             .collection('productos')
-            .update(
-              producto.id,
-              body: {'stock': stock - cantidad, '+miHistorial': item.id},
-            );
-        await pb
-            .collection('items')
-            .update(
-              item.id,
-              body: {'fechaCompletada': DateTime.now().toIso8601String()},
-            );
-      } else {
-        restarCantidadItem(
-          item.id,
-          cantidad,
-        ); //Elimina el item de la orden para prevenir errores
+            .getOne(item.getStringValue('miProducto'));
+        final stock = producto.getIntValue('stock');
+        final cantidad = item.getIntValue('cantidad');
+        if (stock >= cantidad) {
+          await pb
+              .collection('productos')
+              .update(
+                producto.id,
+                body: {'stock': stock - cantidad, '+miHistorial': item.id},
+              );
+          await pb
+              .collection('items')
+              .update(
+                item.id,
+                body: {'fechaCompletada': DateTime.now().toIso8601String()},
+              );
+        } else {
+          restarCantidadItem(
+            item.id,
+            cantidad,
+          ); //Elimina el item de la orden para prevenir errores
+        }
       }
+      await pb
+          .collection('ordenes')
+          .update(
+            idOrden,
+            body: {'fechaCompletada': DateTime.now().toIso8601String()},
+          );
+      await pb
+          .collection('usuarios')
+          .update(
+            orden.getStringValue('miUsuario'),
+            body: {'+misOrdenes': orden.id, 'miOrden-': orden.id},
+          );
+    } catch (e) {
+      print(e);
     }
-    await pb
-        .collection('ordenes')
-        .update(
-          idOrden,
-          body: {'fechaCompletada': DateTime.now().toIso8601String()},
-        );
-    await pb
-        .collection('usuarios')
-        .update(
-          orden.getStringValue('miUsuario'),
-          body: {'+misOrdenes': orden.id, 'miOrden-': orden.id},
-        );
   }
 }
