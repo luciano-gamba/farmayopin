@@ -1,4 +1,5 @@
 import 'package:farmayopin/models/producto.dart';
+import 'package:farmayopin/pages/cliente/listar_productos.dart';
 import 'package:farmayopin/services/pocketbase_service.dart';
 import 'package:farmayopin/widgets/farmayopin_header.dart';
 import 'package:farmayopin/widgets/main_layout.dart';
@@ -27,7 +28,10 @@ class _VerProductoState extends State<VerProducto> {
         children: [
           FarmayopinHeader(
             onVolver: () {
-              Navigator.pop(context);
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (_) => const ListarProductos()),
+              );
             },
           ),
           const SizedBox(height: 20),

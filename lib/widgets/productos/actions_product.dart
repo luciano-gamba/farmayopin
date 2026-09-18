@@ -1,5 +1,6 @@
 import 'package:farmayopin/models/producto.dart';
 import 'package:farmayopin/pages/admin/editar_producto.dart';
+import 'package:farmayopin/pages/admin/historico_producto.dart';
 import 'package:farmayopin/pages/cliente/listar_productos.dart';
 import 'package:farmayopin/services/pocketbase_service.dart';
 import 'package:flutter/material.dart';
@@ -55,7 +56,7 @@ class _AccionesProductoState extends State<AccionesProducto> {
 
   void _editarProducto() {
     // Acá irá la navegación hacia editar producto.
-    Navigator.pushReplacement(
+    Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => EditarProducto(producto: widget.producto)),
     );
@@ -63,6 +64,12 @@ class _AccionesProductoState extends State<AccionesProducto> {
 
   void _historicoProducto() {
     // Acá irá la navegacion hacia historico de producto.
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => HistoricoProducto(producto: widget.producto),
+      ),
+    );
   }
 
   @override

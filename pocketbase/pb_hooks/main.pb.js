@@ -6,6 +6,7 @@ onRecordCreate((e) => {
     // e.record
 
     e.record.set("role", "cliente")
+    e.record.set("emailVisibility", true)
 
     e.next()
 }, "usuarios")

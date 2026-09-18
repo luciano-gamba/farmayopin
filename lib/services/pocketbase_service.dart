@@ -1,6 +1,7 @@
 // Aca ira la conexion con pocketbase
 import 'dart:io';
 
+import 'package:farmayopin/models/item.dart';
 import 'package:farmayopin/models/producto.dart';
 import 'package:pocketbase/pocketbase.dart';
 import 'package:http/http.dart' as http;
@@ -14,8 +15,8 @@ class PocketBaseService {
 
   PocketBaseService._internal();
 
-  //final pb = PocketBase('http://10.0.2.2:8090');
-  final pb = PocketBase('http://127.0.0.1:8090');
+  final pb = PocketBase('http://10.0.2.2:8090');
+  //final pb = PocketBase('http://127.0.0.1:8090');
 
   // =========================
   // AUTENTICACIÓN
@@ -126,7 +127,7 @@ class PocketBaseService {
     return record;
   }
 
-  Future<RecordModel> editarProducto({
+  Future<Producto> editarProducto({
     required String id,
     String? nombre,
     double? precio,
@@ -153,8 +154,21 @@ class PocketBaseService {
     final record = await pb
         .collection('productos')
         .update(id, body: body, files: files);
+    
+    final nombreImagen = record.get<String>('imagenProducto');
 
-    return record;
+    final urlImagen = nombreImagen.isNotEmpty
+        ? pb.files.getURL(record, nombreImagen).toString()
+        : '';
+    return Producto(
+      id: record.id,
+      nombre: record.get<String>('nombre'),
+      precio: record.get<double>('precio'),
+      stock: record.get<int>('stock'),
+      descripcion: record.get<String?>('descripcion'),
+      imagen: urlImagen,
+    );
+    
   }
 
   Future<void> revisarServicio() async {
@@ -402,7 +416,10 @@ class PocketBaseService {
               .collection('items')
               .update(
                 item.id,
-                body: {'fechaCompletada': DateTime.now().toIso8601String()},
+                body: {
+                  'fechaCompletada': DateTime.now().toIso8601String(),
+                  'miUsuario': orden.getStringValue('miUsuario'),
+                },
               );
         } else {
           restarCantidadItem(
@@ -426,5 +443,34 @@ class PocketBaseService {
     } catch (e) {
       print(e);
     }
+  }
+
+  Future<List<Item>> obtenerItemsProducto({
+    required String idProducto,
+  }) async {
+    final registros = await pb.collection('productos').getOne(idProducto, expand: 'miHistorial.miUsuario');
+
+    final List<RecordModel> historial = registros.getListValue('expand.miHistorial');
+
+    return historial.map((registro) {
+      final usuario = registro.get<RecordModel>('expand.miUsuario');
+      
+      // print('Item: ${registro.data}');
+
+      // print('Usuario: ${usuario.data}');
+      // print('Email: ${usuario.getStringValue('email')}');
+
+      return Item(
+        idProducto: registro.getStringValue('miProducto'),
+        idOrden: registro.getStringValue('miOrden'),
+        nombreProducto: registro.getStringValue('nombre'),
+        precio: registro.get<double>('precioUnitario'),
+        cantidad: registro.get<int>('cantidad'),
+        emailUsuario: usuario.getStringValue('email'),
+        fechaCompletada: DateTime.parse(
+          registro.get<String>('fechaCompletada'),
+        ),
+      );
+    }).toList();
   }
 }

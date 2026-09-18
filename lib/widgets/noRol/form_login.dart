@@ -30,8 +30,6 @@ class _FormLogInState extends State<FormLogIn> {
 
   Future<void> _ingresar() async {
     if (_formKey.currentState!.validate()) {
-      final email = _emailController.text;
-      final password = _passwordController.text;
 
       try {
         final usuario = await pocketBaseService.iniciarSesion(

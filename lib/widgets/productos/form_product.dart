@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:farmayopin/models/producto.dart';
 import 'package:farmayopin/pages/cliente/listar_productos.dart';
+import 'package:farmayopin/pages/cliente/ver_producto.dart';
 import 'package:farmayopin/services/pocketbase_service.dart';
 import 'package:farmayopin/widgets/formularios/form_input_decoration.dart';
 import 'package:farmayopin/widgets/formularios/image_picker_field.dart';
@@ -147,7 +148,7 @@ class _FormProductState extends State<FormProduct> {
     });
 
     try {
-      final producto = await pocketBaseService.editarProducto(
+      final productoActualizado  = await pocketBaseService.editarProducto(
         id: widget.producto!.id,
         nombre: _nombreController.text.trim(),
         precio: double.parse(_precioController.text.replaceAll(',', '.')),
@@ -156,11 +157,13 @@ class _FormProductState extends State<FormProduct> {
         descripcion: _detalleController.text.trim(),
       );
 
-      print('Producto editado: ${producto.id}');
+      print('Producto editado: ${productoActualizado.id}');
       if (!mounted) return;
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const ListarProductos()),
+        MaterialPageRoute(
+          builder: (context) => VerProducto(producto: productoActualizado),
+        ),
       );
     } catch (e) {
       print('ERROR AL EDITAR el PRODUCTO: $e');
@@ -355,13 +358,16 @@ class _FormProductState extends State<FormProduct> {
                     Expanded(
                       child: ElevatedButton(
                         onPressed: () {
-                          Navigator.pushReplacement(
+                           widget.producto == null
+                              ? Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    const ListarProductos(),
+                              ),
+                            ) : Navigator.pop(
                             context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  const ListarProductos(),
-                            ),
-                          );
+                            );
                         },
                         child: const Text('Cancelar'),
                       ),
