@@ -171,7 +171,7 @@ class _BuscadorProductosState extends State<BuscadorProductos> {
                   title: Text(producto.data['nombre'] ?? 'Sin nombre'),
                   subtitle: Text('\$${producto.data['precio'] ?? '0'}'),
                   leading: const Icon(Icons.medication), // Icono de ejemplo
-                  onTap: () {
+                  onTap: () async {
                     final String id = producto.id;
                     final String nombre =
                         producto.data['nombre'] ?? 'Sin nombre';
@@ -183,14 +183,16 @@ class _BuscadorProductosState extends State<BuscadorProductos> {
                     final int stock = stockNum.toInt();
 
                     final String? descripcion = producto.data['descripcion'];
-                    final String imagenUrl = producto.data['imagenProducto'];
+
                     final productoAEnviar = Producto(
                       id: id,
                       nombre: nombre,
                       precio: precio,
                       stock: stock,
                       descripcion: descripcion,
-                      imagen: imagenUrl,
+                      imagen: await PocketBaseService().obtenerImagen(
+                        producto.data['id'],
+                      ),
                     );
 
                     // 3. Navegamos a la pantalla VerProducto pasando el objeto correcto

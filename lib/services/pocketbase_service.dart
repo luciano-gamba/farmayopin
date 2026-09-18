@@ -154,7 +154,7 @@ class PocketBaseService {
     final record = await pb
         .collection('productos')
         .update(id, body: body, files: files);
-    
+
     final nombreImagen = record.get<String>('imagenProducto');
 
     final urlImagen = nombreImagen.isNotEmpty
@@ -168,12 +168,22 @@ class PocketBaseService {
       descripcion: record.get<String?>('descripcion'),
       imagen: urlImagen,
     );
-    
   }
 
   Future<void> revisarServicio() async {
     print('Sesión válida: ${pb.authStore.isValid}');
     print('Usuario autenticado: ${pb.authStore.record}');
+  }
+
+  Future<String> obtenerImagen(String idProducto) async {
+    final producto = await pb.collection('productos').getOne(idProducto);
+    final String nombreImagen = producto.getStringValue('imagenProducto');
+
+    final urlImagen = nombreImagen.isNotEmpty
+        ? pb.files.getUrl(producto, nombreImagen).toString()
+        : '';
+
+    return urlImagen;
   }
 
   // =========================
@@ -445,16 +455,18 @@ class PocketBaseService {
     }
   }
 
-  Future<List<Item>> obtenerItemsProducto({
-    required String idProducto,
-  }) async {
-    final registros = await pb.collection('productos').getOne(idProducto, expand: 'miHistorial.miUsuario');
+  Future<List<Item>> obtenerItemsProducto({required String idProducto}) async {
+    final registros = await pb
+        .collection('productos')
+        .getOne(idProducto, expand: 'miHistorial.miUsuario');
 
-    final List<RecordModel> historial = registros.getListValue('expand.miHistorial');
+    final List<RecordModel> historial = registros.getListValue(
+      'expand.miHistorial',
+    );
 
     return historial.map((registro) {
       final usuario = registro.get<RecordModel>('expand.miUsuario');
-      
+
       // print('Item: ${registro.data}');
 
       // print('Usuario: ${usuario.data}');
