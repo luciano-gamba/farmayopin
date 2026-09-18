@@ -183,8 +183,7 @@ class _BuscadorProductosState extends State<BuscadorProductos> {
                     final int stock = stockNum.toInt();
 
                     final String? descripcion = producto.data['descripcion'];
-                    final String imagenUrl =
-                        'https://tu-servidor-pocketbase.com{producto.collectionId}/${producto.id}/${producto.data['imagen']}';
+                    final String imagenUrl = producto.data['imagenProducto'];
                     final productoAEnviar = Producto(
                       id: id,
                       nombre: nombre,
