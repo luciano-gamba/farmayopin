@@ -1,4 +1,5 @@
 import 'package:farmayopin/models/orden.dart';
+import 'package:farmayopin/services/database_service.dart';
 import 'package:farmayopin/services/pocketbase_service.dart';
 import 'package:farmayopin/widgets/historialCliente/history_header_cliente.dart';
 import 'package:farmayopin/widgets/historialCliente/orden_history.dart';
@@ -13,6 +14,7 @@ class PurchaseHistoryCliente extends StatefulWidget {
 
 class _PurchaseHistoryClienteState extends State<PurchaseHistoryCliente> {
   final PocketBaseService pocketBaseService = PocketBaseService();
+  final AppDatabase dbLocal = AppDatabase();
 
   List<Orden> misOrdenes = [];
   bool cargando = true;
@@ -33,13 +35,33 @@ class _PurchaseHistoryClienteState extends State<PurchaseHistoryCliente> {
         misOrdenes = resultado;
         cargando = false;
       });
-    } catch (e) {
-      print('Error al obtener historico del producto: $e');
 
-      setState(() {
-        cargando = false;
-      });
+      for (var orden in resultado) {
+        await dbLocal.registrarNuevaOrden(orden);
+      }
+    } catch (e) {
+      print('Error al obtener historico desde la nube, cargando local...: $e');
+
+      try {
+        final resultadoLocal = await dbLocal.obtenerMisOrdenesLocales();
+
+        setState(() {
+          misOrdenes = resultadoLocal;
+          cargando = false;
+        });
+      } catch (errorLocal) {
+        print('Error crítico leyendo la base de datos local: $errorLocal');
+        setState(() {
+          cargando = false;
+        });
+      }
     }
+  }
+
+  @override
+  void dispose() {
+    dbLocal.close();
+    super.dispose();
   }
 
   @override
