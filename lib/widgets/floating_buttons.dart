@@ -1,8 +1,10 @@
+import 'package:farmayopin/pages/cliente/historico_cliente.dart';
 import 'package:farmayopin/pages/cliente/ver_carrito.dart';
+import 'package:farmayopin/widgets/historialCliente/purchase_history_cliente.dart';
 import 'package:flutter/material.dart';
 
-class floatingButtons extends StatelessWidget {
-  const floatingButtons({super.key});
+class FloatingButtons extends StatelessWidget {
+  const FloatingButtons({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -13,7 +15,10 @@ class floatingButtons extends StatelessWidget {
         FloatingActionButton(
           heroTag: 'btn_reloj', // Evita el error de pantalla negra
           onPressed: () {
-            // Acción para el botón del reloj
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const HistoricoCliente()),
+            );
           },
           backgroundColor: const Color(0xFF1E1E1E), // Tu color gris oscuro
           shape: const CircleBorder(),

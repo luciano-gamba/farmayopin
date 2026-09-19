@@ -30,8 +30,8 @@ class ListarProductos extends StatelessWidget {
         ),
       ),
       floatingActionButton: pocketBaseService.esAdmin
-      ? FloatingAddButton()
-      : floatingButtons(),
+          ? FloatingAddButton()
+          : FloatingButtons(),
     );
   }
 }

@@ -12,13 +12,26 @@ class CarritoScreen extends StatefulWidget {
 
 class _CarritoScreenState extends State<CarritoScreen> {
   final PocketBaseService pocketBaseService = PocketBaseService();
+  late Future<(List<RecordModel>, double, String)> _carritoFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _refreshCarrito();
+  }
+
+  void _refreshCarrito() {
+    setState(() {
+      _carritoFuture = pocketBaseService.obtenerCarrito();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     final anchoPantalla = MediaQuery.of(context).size.width;
 
     return FutureBuilder<(List<RecordModel>, double, String)>(
-      future: pocketBaseService.obtenerCarrito(),
+      future: _carritoFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(
@@ -119,9 +132,9 @@ class _CarritoScreenState extends State<CarritoScreen> {
                 ...items.map((item) {
                   final nombre = item.data['nombre'] ?? 'Producto';
                   final precio = item.data['precioUnitario'] ?? 0;
-                  final cantidad = item.data['cantidad'] ?? 1;
+                  int cantidad = item.data['cantidad'] ?? 1;
                   int cantidadDialogo = item.data['cantidad'] ?? 1;
-                  var stock = 100;
+                  //var stock = 100;
 
                   return Container(
                     width: double.infinity,
@@ -140,7 +153,6 @@ class _CarritoScreenState extends State<CarritoScreen> {
                               showDialog(
                                 context: context,
                                 builder: (BuildContext context) {
-                                  // Usamos StatefulBuilder para actualizar los botones en tiempo real
                                   return StatefulBuilder(
                                     builder: (context, setDialogState) {
                                       return AlertDialog(
@@ -151,19 +163,10 @@ class _CarritoScreenState extends State<CarritoScreen> {
                                           children: [
                                             IconButton(
                                               onPressed: cantidadDialogo > 1
-                                                  ? () async {
-                                                      // Llamamos a tu función personalizada de resta
-                                                      await pocketBaseService
-                                                          .restarCantidadItem(
-                                                            item.id,
-                                                            1,
-                                                          );
-                                                      // Actualizamos el número dentro del diálogo
+                                                  ? () {
                                                       setDialogState(() {
                                                         cantidadDialogo--;
                                                       });
-                                                      // Actualizamos la pantalla de fondo (refresca el FutureBuilder)
-                                                      setState(() {});
                                                     }
                                                   : null,
                                               icon: const Icon(Icons.remove),
@@ -183,32 +186,64 @@ class _CarritoScreenState extends State<CarritoScreen> {
                                               ),
                                             ),
                                             IconButton(
-                                              onPressed: cantidadDialogo < stock
-                                                  ? () async {
-                                                      // Llamamos a tu función personalizada de suma
-                                                      stock =
-                                                          await pocketBaseService
-                                                              .sumarCantidadItem(
-                                                                item.id,
-                                                                1,
-                                                              );
-                                                      // Actualizamos el número dentro del diálogo
-                                                      setDialogState(() {
-                                                        cantidadDialogo++;
-                                                      });
-                                                      // Actualizamos la pantalla de fondo (refresca el FutureBuilder)
-                                                      setState(() {});
-                                                    }
-                                                  : null,
+                                              onPressed: () {
+                                                setDialogState(() {
+                                                  cantidadDialogo++;
+                                                });
+                                              },
                                               icon: const Icon(Icons.add),
                                             ),
                                           ],
                                         ),
                                         actions: [
-                                          TextButton(
-                                            onPressed: () =>
-                                                Navigator.pop(context),
-                                            child: const Text('Cerrar'),
+                                          ElevatedButton(
+                                            onPressed: () async {
+                                              Navigator.pop(context);
+                                              try {
+                                                // 4. Corrección de la lógica de sumas y restas algebraicas
+                                                if (cantidadDialogo >
+                                                    cantidad) {
+                                                  final diferencia =
+                                                      cantidadDialogo -
+                                                      cantidad;
+                                                  await pocketBaseService
+                                                      .sumarCantidadItem(
+                                                        item.id,
+                                                        diferencia,
+                                                      );
+                                                } else if (cantidadDialogo <
+                                                    cantidad) {
+                                                  final diferencia =
+                                                      cantidad -
+                                                      cantidadDialogo;
+                                                  await pocketBaseService
+                                                      .restarCantidadItem(
+                                                        item.id,
+                                                        diferencia,
+                                                      );
+                                                }
+                                                _refreshCarrito();
+                                              } catch (e) {
+                                                if (!context.mounted) return;
+
+                                                final mensajeError = e
+                                                    .toString()
+                                                    .replaceAll(
+                                                      'Exception: ',
+                                                      '',
+                                                    );
+
+                                                ScaffoldMessenger.of(
+                                                  context,
+                                                ).showSnackBar(
+                                                  SnackBar(
+                                                    content: Text(mensajeError),
+                                                    backgroundColor: Colors.red,
+                                                  ),
+                                                );
+                                              }
+                                            },
+                                            child: const Text('Guardar'),
                                           ),
                                         ],
                                       );
@@ -255,9 +290,7 @@ class _CarritoScreenState extends State<CarritoScreen> {
                               item.id,
                               item.getIntValue('cantidad'),
                             );
-
-                            // 3. Notificamos a Flutter que los datos cambiaron para que redibuje la pantalla
-                            setState(() {});
+                            _refreshCarrito();
                           },
                         ),
                       ],
@@ -332,11 +365,15 @@ class _CarritoScreenState extends State<CarritoScreen> {
                         } catch (error) {
                           if (!context.mounted) return;
 
+                          // NUEVO: Limpiamos el texto "Exception: " para mostrar el mensaje directo
+                          final mensajeError = error.toString().replaceAll(
+                            'Exception: ',
+                            '',
+                          );
+
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text(
-                                'Error al procesar el pago: $error',
-                              ),
+                              content: Text(mensajeError), // Mostrará: "La orden no contiene ningún producto."
                               backgroundColor: Colors.red,
                             ),
                           );
