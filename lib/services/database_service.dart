@@ -76,40 +76,55 @@ class AppDatabase extends _$AppDatabase {
 
   // ====== NUEVO MÉTODO: LEER ORDENES DIRECTO COMO TU MODELO NATIVO ======
   Future<List<Orden>> obtenerMisOrdenesLocales() async {
-    // 1. Traemos la lista interna combinada de Drift
-    final ordenes = await select(ordenesTable).get();
-    final listaCompleta = <Orden>[];
+    // 1. Traemos la lista interna combinada de Drift ordenada por fecha descendente
+    try {
+      final ordenes =
+          await (select(ordenesTable)..orderBy([
+                (t) => OrderingTerm(
+                  expression: t.fechaCompletada,
+                  mode: OrderingMode.desc,
+                ),
+              ]))
+              .get();
 
-    for (final ordenDb in ordenes) {
-      // Buscamos los ítems de esta orden
-      final itemsDb = await (select(
-        itemsTable,
-      )..where((t) => t.idOrden.equals(ordenDb.id))).get();
+      final listaCompleta = <Orden>[];
 
-      // Mapeamos a tu clase Item
-      final List<Item> listaDeItems = itemsDb.map((itemRow) {
-        return Item(
-          idProducto: itemRow.idProducto,
-          idOrden: itemRow.idOrden,
-          nombreProducto: itemRow.nombreProducto,
-          precio: itemRow.precio,
-          cantidad: itemRow.cantidad,
-          emailUsuario: itemRow.emailUsuario,
-          fechaCompletada: itemRow.fechaCompletada,
+      for (final ordenDb in ordenes) {
+        // Buscamos los ítems de esta orden
+        final itemsDb = await (select(
+          itemsTable,
+        )..where((t) => t.idOrden.equals(ordenDb.id))).get();
+
+        // Mapeamos a tu clase Item
+        final List<Item> listaDeItems = itemsDb.map((itemRow) {
+          return Item(
+            idProducto: itemRow.idProducto,
+            idOrden: itemRow.idOrden,
+            nombreProducto: itemRow.nombreProducto,
+            precio: itemRow.precio,
+            cantidad: itemRow.cantidad,
+            emailUsuario: itemRow.emailUsuario,
+            fechaCompletada: itemRow.fechaCompletada,
+          );
+        }).toList();
+
+        // Mapeamos a tu clase Orden
+        listaCompleta.add(
+          Orden(
+            id: ordenDb.id,
+            fechaCompletada: ordenDb.fechaCompletada,
+            importeTotal: ordenDb.importeTotal,
+            misItems: listaDeItems,
+          ),
         );
-      }).toList();
+      }
 
-      // Mapeamos a tu clase Orden
-      listaCompleta.add(
-        Orden(
-          id: ordenDb.id,
-          fechaCompletada: ordenDb.fechaCompletada,
-          importeTotal: ordenDb.importeTotal,
-          misItems: listaDeItems,
-        ),
-      );
+      return listaCompleta;
+    } catch (e, stack) {
+      print("ERROR EN DRIFT: $e");
+      print(stack);
+      return [];
     }
-    return listaCompleta;
   }
 
   // Insertar una Orden Completa con todos sus Items dentro de una transacción segura

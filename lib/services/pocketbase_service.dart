@@ -16,8 +16,9 @@ class PocketBaseService {
 
   PocketBaseService._internal();
 
-  //final pb = PocketBase('http://10.0.2.2:8090');
-  final pb = PocketBase('http://127.0.0.1:8090');
+  //final pb = PocketBase('http://10.0.2.2:8090'); //Emulador
+  //final pb = PocketBase('http://127.0.0.1:8090'); //Web
+  final pb = PocketBase('http://192.168.1.58:8090'); //Dispositivo
 
   // =========================
   // AUTENTICACIÓN
