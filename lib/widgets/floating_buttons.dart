@@ -1,6 +1,5 @@
 import 'package:farmayopin/pages/cliente/historico_cliente.dart';
 import 'package:farmayopin/pages/cliente/ver_carrito.dart';
-import 'package:farmayopin/widgets/historialCliente/purchase_history_cliente.dart';
 import 'package:flutter/material.dart';
 
 class FloatingButtons extends StatelessWidget {

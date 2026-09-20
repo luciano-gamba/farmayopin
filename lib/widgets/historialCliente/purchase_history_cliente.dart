@@ -29,32 +29,33 @@ class _PurchaseHistoryClienteState extends State<PurchaseHistoryCliente> {
 
   Future<void> cargarHistorial() async {
     try {
-      final resultado = await pocketBaseService.obtenerMisOrdenes();
-
-      setState(() {
-        misOrdenes = resultado;
-        cargando = false;
-      });
-
-      for (var orden in resultado) {
-        await dbLocal.registrarNuevaOrden(orden);
-      }
-    } catch (e) {
-      print('Error al obtener historico desde la nube, cargando local...: $e');
-
-      try {
-        final resultadoLocal = await dbLocal.obtenerMisOrdenesLocales();
-
+      final resultadoLocal = await dbLocal.obtenerMisOrdenesLocales();
+      if (resultadoLocal.isNotEmpty) {
         setState(() {
           misOrdenes = resultadoLocal;
           cargando = false;
         });
-      } catch (errorLocal) {
-        print('Error crítico leyendo la base de datos local: $errorLocal');
-        setState(() {
-          cargando = false;
-        });
       }
+    } catch (errorLocal) {
+      print('Error leyendo la base de datos local: $errorLocal');
+    }
+
+    try {
+      final resultadoCloud = await pocketBaseService.obtenerMisOrdenes();
+
+      for (var orden in resultadoCloud) {
+        await dbLocal.registrarNuevaOrden(orden);
+      }
+
+      setState(() {
+        misOrdenes = resultadoCloud;
+        cargando = false;
+      });
+    } catch (e) {
+      print('Error al actualizar desde la nube (red no disponible): $e');
+      setState(() {
+        cargando = false;
+      });
     }
   }
 
