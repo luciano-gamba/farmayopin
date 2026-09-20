@@ -1,6 +1,7 @@
 import 'package:farmayopin/models/producto.dart';
 import 'package:farmayopin/pages/cliente/ver_producto.dart';
 import 'package:farmayopin/pages/noRol/ingresar.dart';
+import 'package:farmayopin/services/database_service.dart';
 import 'package:farmayopin/services/pocketbase_service.dart';
 import 'package:flutter/material.dart';
 import 'package:pocketbase/pocketbase.dart'; // Asegúrate de tener esta importación
@@ -16,6 +17,7 @@ class _BuscadorProductosState extends State<BuscadorProductos> {
   // Controladores y servicios
   final TextEditingController _searchController = TextEditingController();
   final PocketBaseService _pbService = PocketBaseService();
+  final AppDatabase dbLocal = AppDatabase();
 
   // Lista para guardar los productos encontrados
   List<RecordModel> _productos = [];
@@ -80,6 +82,7 @@ class _BuscadorProductosState extends State<BuscadorProductos> {
 
     if (confirmar == true) {
       await _pbService.cerrarSesion();
+      await dbLocal.vaciarCacheUsuario();
       if (context.mounted) {
         Navigator.pushReplacement(
           context,

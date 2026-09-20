@@ -176,6 +176,17 @@ class AppDatabase extends _$AppDatabase {
     }
     return listaCompleta;
   }
+
+  Future<void> vaciarCacheUsuario() async {
+    try {
+      await transaction(() async {
+        await delete(ordenesTable).go();
+      });
+      print('Caché local de Drift vaciado correctamente.');
+    } catch (e) {
+      print('Error al vaciar el caché local: $e');
+    }
+  }
 }
 
 LazyDatabase _openConnection() {
